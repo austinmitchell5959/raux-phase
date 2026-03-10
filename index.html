@@ -9,12 +9,30 @@
 <body>
   <div class="container">
     <h1>Raux Phase 2</h1>
-    <p>Start a session in the browser.</p>
+    <p>Build a session in the browser.</p>
 
     <input type="text" id="sessionInput" placeholder="Enter session name">
+
+    <select id="modeInput">
+      <option value="">Select mode</option>
+      <option value="prototype">Prototype</option>
+      <option value="build">Build</option>
+      <option value="test">Test</option>
+    </select>
+
+    <select id="moodInput">
+      <option value="">Select mood</option>
+      <option value="focused">Focused</option>
+      <option value="creative">Creative</option>
+      <option value="calm">Calm</option>
+      <option value="hype">Hype</option>
+    </select>
+
     <button id="startButton">Start Session</button>
 
-    <p id="output">Waiting for input...</p>
+    <div id="outputBox">
+      <p id="output">Waiting for input...</p>
+    </div>
   </div>
 
   <script src="script.js"></script>

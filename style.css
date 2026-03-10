@@ -5,7 +5,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
+    min-height: 100vh;
     margin: 0;
   }
   
@@ -14,10 +14,11 @@ body {
     background: #1e1e1e;
     padding: 30px;
     border-radius: 12px;
-    width: 320px;
+    width: 340px;
   }
   
-  input {
+  input,
+  select {
     width: 100%;
     padding: 10px;
     margin-top: 10px;
@@ -25,12 +26,20 @@ body {
   }
   
   button {
-    margin-top: 12px;
+    margin-top: 14px;
     padding: 10px 16px;
     cursor: pointer;
   }
   
-  #output {
+  #outputBox {
     margin-top: 20px;
+    padding: 12px;
+    background: #2a2a2a;
+    border-radius: 8px;
+  }
+  
+  #output {
+    margin: 0;
     color: #7CFFB2;
+    line-height: 1.5;
   }
