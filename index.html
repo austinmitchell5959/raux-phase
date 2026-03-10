@@ -7,64 +7,112 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="container">
-    <h1>Raux Phase 2</h1>
-    <p>Build a session in the browser.</p>
-
-    <input type="text" id="sessionInput" placeholder="Enter session name">
-
-    <select id="modeInput">
-      <option value="">Select mode</option>
-      <option value="prototype">Prototype</option>
-      <option value="build">Build</option>
-      <option value="test">Test</option>
-    </select>
-
-    <p class="label">Choose mood</p>
-    <div class="mood-buttons">
-      <button class="mood-button" data-mood="focused" type="button">Focused</button>
-      <button class="mood-button" data-mood="creative" type="button">Creative</button>
-      <button class="mood-button" data-mood="calm" type="button">Calm</button>
-      <button class="mood-button" data-mood="hype" type="button">Hype</button>
-    </div>
-
-    <div class="action-buttons">
-      <button id="startButton" type="button">Start Session</button>
-      <button id="resetButton" type="button">Reset</button>
-    </div>
-
-    <div id="outputBox" class="neutral">
-      <p id="output">Waiting for input...</p>
-    </div>
-
-    <div class="history-section">
-      <div class="history-header">
-        <h2>Session History</h2>
-        <div class="history-controls">
-          <button id="exportButton" type="button">Export</button>
-          <button id="clearHistoryButton" type="button">Clear History</button>
-        </div>
+  <div class="app-shell">
+    <div class="container">
+      <div class="hero">
+        <p class="eyebrow">RAUX SYSTEM</p>
+        <h1>Raux Phase 2</h1>
+        <p class="hero-text">Build, track, and refine your sessions in one place.</p>
       </div>
 
-      <div class="filter-bar">
-        <select id="filterMood">
-          <option value="all">All moods</option>
-          <option value="focused">Focused</option>
-          <option value="creative">Creative</option>
-          <option value="calm">Calm</option>
-          <option value="hype">Hype</option>
-        </select>
+      <div class="panel">
+        <h2>Create Session</h2>
 
-        <select id="filterMode">
-          <option value="all">All modes</option>
+        <input type="text" id="sessionInput" placeholder="Enter session name">
+
+        <select id="modeInput">
+          <option value="">Select mode</option>
           <option value="prototype">Prototype</option>
           <option value="build">Build</option>
           <option value="test">Test</option>
         </select>
+
+        <select id="categoryInput">
+          <option value="">Select category</option>
+          <option value="focus">Focus</option>
+          <option value="creative">Creative</option>
+          <option value="recovery">Recovery</option>
+          <option value="energy">Energy</option>
+        </select>
+
+        <p class="label">Choose mood</p>
+        <div class="mood-buttons">
+          <button class="mood-button" data-mood="focused" type="button">Focused</button>
+          <button class="mood-button" data-mood="creative" type="button">Creative</button>
+          <button class="mood-button" data-mood="calm" type="button">Calm</button>
+          <button class="mood-button" data-mood="hype" type="button">Hype</button>
+        </div>
+
+        <div class="action-buttons">
+          <button id="startButton" type="button">Start Session</button>
+          <button id="resetButton" type="button">Reset</button>
+        </div>
+
+        <div id="outputBox" class="neutral">
+          <p id="output">Waiting for input...</p>
+        </div>
       </div>
 
-      <div id="historyList">
-        <p class="empty-history">No sessions yet.</p>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <span class="stat-label">Total Sessions</span>
+          <span class="stat-value" id="totalSessions">0</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Top Mood</span>
+          <span class="stat-value" id="topMood">-</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Top Mode</span>
+          <span class="stat-value" id="topMode">-</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Top Category</span>
+          <span class="stat-value" id="topCategory">-</span>
+        </div>
+      </div>
+
+      <div class="panel history-section">
+        <div class="history-header">
+          <h2>Session History</h2>
+          <div class="history-controls">
+            <button id="exportButton" type="button">Export</button>
+            <button id="clearHistoryButton" type="button">Clear History</button>
+          </div>
+        </div>
+
+        <div class="search-bar">
+          <input type="text" id="searchInput" placeholder="Search session history">
+        </div>
+
+        <div class="filter-bar">
+          <select id="filterMood">
+            <option value="all">All moods</option>
+            <option value="focused">Focused</option>
+            <option value="creative">Creative</option>
+            <option value="calm">Calm</option>
+            <option value="hype">Hype</option>
+          </select>
+
+          <select id="filterMode">
+            <option value="all">All modes</option>
+            <option value="prototype">Prototype</option>
+            <option value="build">Build</option>
+            <option value="test">Test</option>
+          </select>
+
+          <select id="filterCategory">
+            <option value="all">All categories</option>
+            <option value="focus">Focus</option>
+            <option value="creative">Creative</option>
+            <option value="recovery">Recovery</option>
+            <option value="energy">Energy</option>
+          </select>
+        </div>
+
+        <div id="historyList">
+          <p class="empty-history">No sessions yet.</p>
+        </div>
       </div>
     </div>
   </div>

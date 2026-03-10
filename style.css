@@ -1,38 +1,98 @@
-body {
+:root {
+    --bg: #0b1020;
+    --panel: rgba(20, 26, 45, 0.9);
+    --panel-2: rgba(31, 39, 67, 0.9);
+    --text: #f5f7ff;
+    --muted: #a9b1d6;
+    --accent: #8b5cf6;
+    --accent-2: #22c55e;
+    --danger: #ef4444;
+    --border: rgba(255, 255, 255, 0.08);
+  }
+  
+  * {
+    box-sizing: border-box;
+  }
+  
+  body {
+    margin: 0;
     font-family: Arial, sans-serif;
-    background: #111;
-    color: white;
+    background:
+      radial-gradient(circle at top left, rgba(139, 92, 246, 0.25), transparent 30%),
+      radial-gradient(circle at top right, rgba(34, 197, 94, 0.18), transparent 25%),
+      linear-gradient(180deg, #090d18 0%, #11182d 100%);
+    color: var(--text);
+    min-height: 100vh;
+  }
+  
+  .app-shell {
+    width: 100%;
+    padding: 24px 12px 48px;
     display: flex;
     justify-content: center;
-    align-items: flex-start;
-    min-height: 100vh;
-    margin: 0;
-    padding: 30px 12px;
   }
   
   .container {
-    text-align: center;
-    background: #1e1e1e;
-    padding: 24px;
-    border-radius: 12px;
     width: 100%;
-    max-width: 420px;
-    box-sizing: border-box;
+    max-width: 900px;
+  }
+  
+  .hero {
+    text-align: center;
+    margin-bottom: 22px;
+  }
+  
+  .eyebrow {
+    color: var(--accent-2);
+    font-size: 12px;
+    letter-spacing: 2px;
+    margin: 0 0 8px;
+  }
+  
+  .hero h1 {
+    margin: 0;
+    font-size: 40px;
+  }
+  
+  .hero-text {
+    margin-top: 10px;
+    color: var(--muted);
+  }
+  
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 22px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.28);
+    margin-bottom: 20px;
+  }
+  
+  .panel h2 {
+    margin-top: 0;
+    margin-bottom: 14px;
   }
   
   input,
   select {
     width: 100%;
-    padding: 10px;
+    padding: 12px;
     margin-top: 10px;
-    box-sizing: border-box;
-    border-radius: 8px;
-    border: none;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text);
+  }
+  
+  input::placeholder {
+    color: #9ca3af;
   }
   
   .label {
-    margin-top: 16px;
+    margin-top: 18px;
     margin-bottom: 8px;
+    color: var(--muted);
   }
   
   .mood-buttons {
@@ -50,20 +110,34 @@ body {
   .delete-button,
   .save-edit-button,
   .cancel-edit-button {
-    padding: 10px 16px;
+    padding: 11px 14px;
     cursor: pointer;
     border: none;
-    border-radius: 8px;
+    border-radius: 12px;
+    color: white;
+    transition: transform 0.15s ease, opacity 0.15s ease, background 0.2s ease;
+  }
+  
+  .mood-button:hover,
+  #startButton:hover,
+  #resetButton:hover,
+  #clearHistoryButton:hover,
+  #exportButton:hover,
+  .edit-button:hover,
+  .delete-button:hover,
+  .save-edit-button:hover,
+  .cancel-edit-button:hover {
+    transform: translateY(-1px);
+    opacity: 0.96;
   }
   
   .mood-button {
-    background: #333;
-    color: white;
+    background: rgba(255, 255, 255, 0.08);
   }
   
   .mood-button.active {
-    outline: 2px solid #7cffb2;
-    background: #2f4f40;
+    background: linear-gradient(135deg, #8b5cf6, #22c55e);
+    color: white;
   }
   
   .action-buttons {
@@ -72,49 +146,82 @@ body {
     margin-top: 16px;
   }
   
-  #startButton,
+  #startButton {
+    flex: 1;
+    background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+  }
+  
   #resetButton {
     flex: 1;
+    background: #374151;
   }
   
   #outputBox {
     margin-top: 20px;
-    padding: 14px;
-    border-radius: 10px;
+    padding: 16px;
+    border-radius: 14px;
     transition: background 0.2s ease;
+    border: 1px solid rgba(255,255,255,0.06);
   }
   
   #output {
     margin: 0;
-    line-height: 1.6;
+    line-height: 1.7;
   }
   
   .neutral {
-    background: #2a2a2a;
+    background: rgba(255, 255, 255, 0.05);
   }
   
   .deep-work {
-    background: #1f3b4d;
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.35), rgba(30, 64, 175, 0.35));
   }
   
   .idea-sprint {
-    background: #4a2a52;
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.35), rgba(91, 33, 182, 0.35));
   }
   
   .soft-session {
-    background: #2d4a3a;
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.3), rgba(21, 128, 61, 0.3));
   }
   
   .energy-boost {
-    background: #5a3a1a;
+    background: linear-gradient(135deg, rgba(249, 115, 22, 0.35), rgba(194, 65, 12, 0.35));
   }
   
   .custom-session {
-    background: #444;
+    background: linear-gradient(135deg, rgba(107, 114, 128, 0.35), rgba(55, 65, 81, 0.35));
+  }
+  
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  
+  .stat-card {
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 16px;
+    text-align: left;
+  }
+  
+  .stat-label {
+    display: block;
+    color: var(--muted);
+    font-size: 12px;
+    margin-bottom: 8px;
+  }
+  
+  .stat-value {
+    display: block;
+    font-size: 24px;
+    font-weight: bold;
   }
   
   .history-section {
-    margin-top: 24px;
     text-align: left;
   }
   
@@ -126,105 +233,109 @@ body {
     flex-wrap: wrap;
   }
   
-  .history-header h2 {
-    margin: 0;
-    font-size: 20px;
-  }
-  
   .history-controls {
     display: flex;
     gap: 8px;
   }
   
-  #clearHistoryButton,
   #exportButton {
-    background: #444;
-    color: white;
-    font-size: 12px;
+    background: #2563eb;
+  }
+  
+  #clearHistoryButton {
+    background: #4b5563;
+  }
+  
+  .search-bar {
+    margin-top: 14px;
   }
   
   .filter-bar {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
     gap: 10px;
-    margin-top: 14px;
+    margin-top: 12px;
   }
   
   #historyList {
-    margin-top: 14px;
+    margin-top: 16px;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 12px;
   }
   
   .history-card {
-    background: #2a2a2a;
-    border-radius: 10px;
-    padding: 12px;
-    line-height: 1.5;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px;
+    line-height: 1.6;
   }
   
   .history-card strong {
-    color: #7cffb2;
+    color: #86efac;
+    font-size: 16px;
   }
   
   .history-card-actions {
     display: flex;
     gap: 8px;
-    margin-top: 10px;
+    margin-top: 12px;
   }
   
-  .edit-button {
-    background: #2f4f40;
-    color: white;
+  .edit-button,
+  .save-edit-button {
+    background: #16a34a;
   }
   
   .delete-button {
-    background: #5a2222;
-    color: white;
-  }
-  
-  .save-edit-button {
-    background: #2f4f40;
-    color: white;
+    background: #dc2626;
   }
   
   .cancel-edit-button {
-    background: #555;
-    color: white;
+    background: #6b7280;
   }
   
   .edit-input {
     width: 100%;
-    margin-top: 8px;
+    margin-top: 10px;
     padding: 10px;
-    box-sizing: border-box;
-    border-radius: 8px;
-    border: none;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: rgba(255,255,255,0.05);
+    color: white;
   }
   
   .empty-history {
-    color: #bbb;
+    color: var(--muted);
     margin: 0;
   }
   
-  @media (max-width: 480px) {
-    .container {
-      padding: 18px;
+  @media (max-width: 760px) {
+    .stats-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  
+    .filter-bar {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  @media (max-width: 520px) {
+    .hero h1 {
+      font-size: 30px;
     }
   
     .mood-buttons,
-    .filter-bar,
+    .stats-grid,
     .action-buttons,
-    .history-card-actions,
-    .history-controls {
-      grid-template-columns: 1fr;
+    .history-controls,
+    .history-card-actions {
+      display: flex;
       flex-direction: column;
     }
   
-    .action-buttons,
-    .history-card-actions,
-    .history-controls {
-      display: flex;
+    .stats-grid {
+      gap: 10px;
     }
   }
