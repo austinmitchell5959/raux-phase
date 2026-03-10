@@ -6,10 +6,17 @@
     --muted: #a9b1d6;
     --accent: #8b5cf6;
     --accent-2: #22c55e;
-    --danger: #ef4444;
     --border: rgba(255, 255, 255, 0.08);
+  
     --spotify: #1db954;
     --spotify-dark: #169c46;
+  
+    --apple-1: #ffffff;
+    --apple-2: #f3d0da;
+    --apple-text: #111111;
+  
+    --soundcloud-1: #ff7a18;
+    --soundcloud-2: #ff5500;
   }
   
   * {
@@ -76,20 +83,15 @@
     margin-bottom: 14px;
   }
   
-  .spotify-panel {
-    border: 1px solid rgba(29, 185, 84, 0.35);
-    background: linear-gradient(135deg, rgba(20, 26, 45, 0.95), rgba(12, 20, 30, 0.95));
+  .music-panel {
+    border: 1px solid rgba(255, 255, 255, 0.1);
   }
   
-  .spotify-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 16px;
-    flex-wrap: wrap;
+  .music-header {
+    margin-bottom: 14px;
   }
   
-  .spotify-label {
+  .music-label {
     margin: 0 0 6px;
     color: #7ee2a8;
     font-size: 12px;
@@ -97,66 +99,183 @@
     text-transform: uppercase;
   }
   
-  .spotify-title {
+  .music-title {
     margin: 0;
   }
   
-  .spotify-button {
-    display: inline-flex;
+  .music-buttons-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .music-service-button {
+    display: flex;
     align-items: center;
-    gap: 10px;
-    background: linear-gradient(135deg, var(--spotify), var(--spotify-dark));
-    color: white;
+    gap: 14px;
+    width: 100%;
     border: none;
-    border-radius: 999px;
-    padding: 12px 18px;
-    font-weight: bold;
+    border-radius: 18px;
+    padding: 14px 16px;
     cursor: pointer;
-    box-shadow: 0 8px 20px rgba(29, 185, 84, 0.28);
+    text-align: left;
     transition: transform 0.15s ease, opacity 0.15s ease;
   }
   
-  .spotify-button:hover {
+  .music-service-button:hover {
     transform: translateY(-1px);
     opacity: 0.97;
   }
   
+  .service-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 38px;
+    width: 38px;
+    height: 38px;
+    border-radius: 999px;
+  }
+  
+  .service-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  
+  .service-name {
+    font-weight: bold;
+    font-size: 15px;
+  }
+  
+  .service-action {
+    font-size: 13px;
+    opacity: 0.9;
+  }
+  
+  .spotify-button {
+    background: linear-gradient(135deg, var(--spotify), var(--spotify-dark));
+    color: white;
+    box-shadow: 0 8px 20px rgba(29, 185, 84, 0.25);
+  }
+  
   .spotify-icon {
-    width: 26px;
-    height: 26px;
-    border-radius: 50%;
     background: #0f1117;
     position: relative;
-    display: inline-block;
   }
   
   .spotify-icon span {
     position: absolute;
-    left: 6px;
-    right: 6px;
+    left: 8px;
+    right: 8px;
     height: 2px;
     background: white;
     border-radius: 999px;
   }
   
   .spotify-icon span:nth-child(1) {
-    top: 8px;
+    top: 11px;
   }
   
   .spotify-icon span:nth-child(2) {
-    top: 12px;
+    top: 17px;
   }
   
   .spotify-icon span:nth-child(3) {
-    top: 16px;
+    top: 23px;
   }
   
-  .spotify-status {
-    margin: 14px 0 0;
+  .apple-button {
+    background: linear-gradient(135deg, var(--apple-1), var(--apple-2));
+    color: var(--apple-text);
+    box-shadow: 0 8px 20px rgba(255, 255, 255, 0.12);
+  }
+  
+  .apple-icon {
+    background: rgba(17, 17, 17, 0.08);
+    color: #d63384;
+    font-size: 20px;
+    font-weight: bold;
+  }
+  
+  .soundcloud-button {
+    background: linear-gradient(135deg, var(--soundcloud-1), var(--soundcloud-2));
+    color: white;
+    box-shadow: 0 8px 20px rgba(255, 85, 0, 0.25);
+  }
+  
+  .soundcloud-icon {
+    background: rgba(255, 255, 255, 0.14);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .soundcloud-icon .cloud {
+    position: absolute;
+    width: 15px;
+    height: 10px;
+    background: white;
+    border-radius: 999px;
+    left: 8px;
+    top: 10px;
+  }
+  
+  .soundcloud-icon .cloud::before,
+  .soundcloud-icon .cloud::after {
+    content: "";
+    position: absolute;
+    background: white;
+    border-radius: 999px;
+  }
+  
+  .soundcloud-icon .cloud::before {
+    width: 10px;
+    height: 10px;
+    left: -4px;
+    top: 1px;
+  }
+  
+  .soundcloud-icon .cloud::after {
+    width: 11px;
+    height: 11px;
+    right: -4px;
+    top: -1px;
+  }
+  
+  .soundcloud-icon .bars {
+    position: absolute;
+    right: 5px;
+    bottom: 7px;
+    display: flex;
+    gap: 2px;
+    align-items: flex-end;
+  }
+  
+  .soundcloud-icon .bars span {
+    display: block;
+    width: 2px;
+    background: white;
+    border-radius: 999px;
+  }
+  
+  .soundcloud-icon .bars span:nth-child(1) { height: 6px; }
+  .soundcloud-icon .bars span:nth-child(2) { height: 9px; }
+  .soundcloud-icon .bars span:nth-child(3) { height: 12px; }
+  .soundcloud-icon .bars span:nth-child(4) { height: 8px; }
+  
+  .music-status-stack {
+    margin-top: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  
+  .service-status {
+    margin: 0;
     color: var(--muted);
   }
   
-  .spotify-status.connected {
+  .service-status.connected {
     color: #7ee2a8;
   }
   
@@ -423,10 +542,5 @@
   
     .stats-grid {
       gap: 10px;
-    }
-  
-    .spotify-row {
-      flex-direction: column;
-      align-items: stretch;
     }
   }

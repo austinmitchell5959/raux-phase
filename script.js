@@ -13,8 +13,14 @@ const searchInput = document.getElementById("searchInput");
 const output = document.getElementById("output");
 const outputBox = document.getElementById("outputBox");
 const historyList = document.getElementById("historyList");
+
 const spotifyButton = document.getElementById("spotifyButton");
+const appleMusicButton = document.getElementById("appleMusicButton");
+const soundcloudButton = document.getElementById("soundcloudButton");
+
 const spotifyStatus = document.getElementById("spotifyStatus");
+const appleMusicStatus = document.getElementById("appleMusicStatus");
+const soundcloudStatus = document.getElementById("soundcloudStatus");
 
 const totalSessions = document.getElementById("totalSessions");
 const topMood = document.getElementById("topMood");
@@ -23,7 +29,12 @@ const topCategory = document.getElementById("topCategory");
 
 let selectedMood = "";
 let sessionHistory = JSON.parse(localStorage.getItem("rauxSessionHistory")) || [];
-let spotifyConnected = JSON.parse(localStorage.getItem("rauxSpotifyConnected")) || false;
+
+let musicConnections = JSON.parse(localStorage.getItem("rauxMusicConnections")) || {
+  spotify: false,
+  appleMusic: false,
+  soundcloud: false
+};
 
 function getRauxType(mood) {
   const lowerMood = mood.toLowerCase();
@@ -55,33 +66,39 @@ function saveHistory() {
   localStorage.setItem("rauxSessionHistory", JSON.stringify(sessionHistory));
 }
 
-function saveSpotifyState() {
-  localStorage.setItem("rauxSpotifyConnected", JSON.stringify(spotifyConnected));
+function saveMusicConnections() {
+  localStorage.setItem("rauxMusicConnections", JSON.stringify(musicConnections));
 }
 
-function updateSpotifyUI() {
-  if (spotifyConnected) {
-    spotifyStatus.textContent = "Spotify connected — prototype view only.";
+function updateMusicUI() {
+  if (musicConnections.spotify) {
+    spotifyStatus.textContent = "Spotify: connected — prototype only.";
     spotifyStatus.classList.add("connected");
-    spotifyButton.innerHTML = `
-      <span class="spotify-icon">
-        <span></span>
-        <span></span>
-        <span></span>
-      </span>
-      <span>Spotify Connected</span>
-    `;
+    spotifyButton.querySelector(".service-action").textContent = "Spotify Connected";
   } else {
-    spotifyStatus.textContent = "Not connected — prototype mode only.";
+    spotifyStatus.textContent = "Spotify: not connected — prototype only.";
     spotifyStatus.classList.remove("connected");
-    spotifyButton.innerHTML = `
-      <span class="spotify-icon">
-        <span></span>
-        <span></span>
-        <span></span>
-      </span>
-      <span>Connect to Spotify</span>
-    `;
+    spotifyButton.querySelector(".service-action").textContent = "Connect to Spotify";
+  }
+
+  if (musicConnections.appleMusic) {
+    appleMusicStatus.textContent = "Apple Music: connected — prototype only.";
+    appleMusicStatus.classList.add("connected");
+    appleMusicButton.querySelector(".service-action").textContent = "Apple Music Connected";
+  } else {
+    appleMusicStatus.textContent = "Apple Music: not connected — prototype only.";
+    appleMusicStatus.classList.remove("connected");
+    appleMusicButton.querySelector(".service-action").textContent = "Connect to Apple Music";
+  }
+
+  if (musicConnections.soundcloud) {
+    soundcloudStatus.textContent = "SoundCloud: connected — prototype only.";
+    soundcloudStatus.classList.add("connected");
+    soundcloudButton.querySelector(".service-action").textContent = "SoundCloud Connected";
+  } else {
+    soundcloudStatus.textContent = "SoundCloud: not connected — prototype only.";
+    soundcloudStatus.classList.remove("connected");
+    soundcloudButton.querySelector(".service-action").textContent = "Connect to SoundCloud";
   }
 }
 
@@ -180,6 +197,9 @@ function renderHistory() {
         Category: ${session.category}<br>
         Mood: ${session.mood}<br>
         Type: ${session.rauxType}<br>
+        Spotify: ${session.spotifyConnected ? "Yes" : "No"}<br>
+        Apple Music: ${session.appleMusicConnected ? "Yes" : "No"}<br>
+        SoundCloud: ${session.soundcloudConnected ? "Yes" : "No"}<br>
         Time: ${session.timestamp}
         <div class="history-card-actions">
           <button class="edit-button" data-id="${session.id}" type="button">Edit</button>
@@ -276,9 +296,21 @@ moodButtons.forEach(function(button) {
 });
 
 spotifyButton.addEventListener("click", function() {
-  spotifyConnected = !spotifyConnected;
-  saveSpotifyState();
-  updateSpotifyUI();
+  musicConnections.spotify = !musicConnections.spotify;
+  saveMusicConnections();
+  updateMusicUI();
+});
+
+appleMusicButton.addEventListener("click", function() {
+  musicConnections.appleMusic = !musicConnections.appleMusic;
+  saveMusicConnections();
+  updateMusicUI();
+});
+
+soundcloudButton.addEventListener("click", function() {
+  musicConnections.soundcloud = !musicConnections.soundcloud;
+  saveMusicConnections();
+  updateMusicUI();
 });
 
 startButton.addEventListener("click", function() {
@@ -303,7 +335,9 @@ startButton.addEventListener("click", function() {
     Category: ${category}<br>
     Mood: ${selectedMood}<br>
     Suggested Raux Type: ${rauxType}<br>
-    Spotify: ${spotifyConnected ? "Connected (prototype)" : "Not connected"}<br>
+    Spotify: ${musicConnections.spotify ? "Connected (prototype)" : "Not connected"}<br>
+    Apple Music: ${musicConnections.appleMusic ? "Connected (prototype)" : "Not connected"}<br>
+    SoundCloud: ${musicConnections.soundcloud ? "Connected (prototype)" : "Not connected"}<br>
     Time: ${timestamp}
   `;
 
@@ -317,7 +351,9 @@ startButton.addEventListener("click", function() {
     category: category,
     mood: selectedMood,
     rauxType: rauxType,
-    spotifyConnected: spotifyConnected,
+    spotifyConnected: musicConnections.spotify,
+    appleMusicConnected: musicConnections.appleMusic,
+    soundcloudConnected: musicConnections.soundcloud,
     timestamp: timestamp,
     isEditing: false
   };
@@ -366,6 +402,6 @@ filterMode.addEventListener("change", renderHistory);
 filterCategory.addEventListener("change", renderHistory);
 searchInput.addEventListener("input", renderHistory);
 
-updateSpotifyUI();
+updateMusicUI();
 renderHistory();
 updateStats();

@@ -15,24 +15,54 @@
         <p class="hero-text">Build, track, and refine your sessions in one place.</p>
       </div>
 
-      <div class="panel spotify-panel">
-        <div class="spotify-row">
+      <div class="panel music-panel">
+        <div class="music-header">
           <div>
-            <p class="spotify-label">Music Connection</p>
-            <h2 class="spotify-title">Spotify Prototype</h2>
+            <p class="music-label">Music Connections</p>
+            <h2 class="music-title">Prototype Integrations</h2>
           </div>
-          <button id="spotifyButton" class="spotify-button" type="button">
-            <span class="spotify-icon">
+        </div>
+
+        <div class="music-buttons-grid">
+          <button id="spotifyButton" class="music-service-button spotify-button" type="button">
+            <span class="service-icon spotify-icon">
               <span></span>
               <span></span>
               <span></span>
             </span>
-            <span>Connect to Spotify</span>
+            <span class="service-copy">
+              <span class="service-name">Spotify</span>
+              <span class="service-action">Connect to Spotify</span>
+            </span>
+          </button>
+
+          <button id="appleMusicButton" class="music-service-button apple-button" type="button">
+            <span class="service-icon apple-icon">♪</span>
+            <span class="service-copy">
+              <span class="service-name">Apple Music</span>
+              <span class="service-action">Connect to Apple Music</span>
+            </span>
+          </button>
+
+          <button id="soundcloudButton" class="music-service-button soundcloud-button" type="button">
+            <span class="service-icon soundcloud-icon">
+              <span class="cloud"></span>
+              <span class="bars">
+                <span></span><span></span><span></span><span></span>
+              </span>
+            </span>
+            <span class="service-copy">
+              <span class="service-name">SoundCloud</span>
+              <span class="service-action">Connect to SoundCloud</span>
+            </span>
           </button>
         </div>
-        <p id="spotifyStatus" class="spotify-status">
-          Not connected — prototype mode only.
-        </p>
+
+        <div class="music-status-stack">
+          <p id="spotifyStatus" class="service-status">Spotify: not connected — prototype only.</p>
+          <p id="appleMusicStatus" class="service-status">Apple Music: not connected — prototype only.</p>
+          <p id="soundcloudStatus" class="service-status">SoundCloud: not connected — prototype only.</p>
+        </div>
       </div>
 
       <div class="panel">
