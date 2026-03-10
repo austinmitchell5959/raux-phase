@@ -7,15 +7,17 @@ body {
     align-items: flex-start;
     min-height: 100vh;
     margin: 0;
-    padding: 30px 0;
+    padding: 30px 12px;
   }
   
   .container {
     text-align: center;
     background: #1e1e1e;
-    padding: 30px;
+    padding: 24px;
     border-radius: 12px;
-    width: 380px;
+    width: 100%;
+    max-width: 420px;
+    box-sizing: border-box;
   }
   
   input,
@@ -24,6 +26,8 @@ body {
     padding: 10px;
     margin-top: 10px;
     box-sizing: border-box;
+    border-radius: 8px;
+    border: none;
   }
   
   .label {
@@ -40,7 +44,12 @@ body {
   .mood-button,
   #startButton,
   #resetButton,
-  #clearHistoryButton {
+  #clearHistoryButton,
+  #exportButton,
+  .edit-button,
+  .delete-button,
+  .save-edit-button,
+  .cancel-edit-button {
     padding: 10px 16px;
     cursor: pointer;
     border: none;
@@ -114,6 +123,7 @@ body {
     justify-content: space-between;
     align-items: center;
     gap: 10px;
+    flex-wrap: wrap;
   }
   
   .history-header h2 {
@@ -121,10 +131,23 @@ body {
     font-size: 20px;
   }
   
-  #clearHistoryButton {
+  .history-controls {
+    display: flex;
+    gap: 8px;
+  }
+  
+  #clearHistoryButton,
+  #exportButton {
     background: #444;
     color: white;
     font-size: 12px;
+  }
+  
+  .filter-bar {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 14px;
   }
   
   #historyList {
@@ -145,7 +168,63 @@ body {
     color: #7cffb2;
   }
   
+  .history-card-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  
+  .edit-button {
+    background: #2f4f40;
+    color: white;
+  }
+  
+  .delete-button {
+    background: #5a2222;
+    color: white;
+  }
+  
+  .save-edit-button {
+    background: #2f4f40;
+    color: white;
+  }
+  
+  .cancel-edit-button {
+    background: #555;
+    color: white;
+  }
+  
+  .edit-input {
+    width: 100%;
+    margin-top: 8px;
+    padding: 10px;
+    box-sizing: border-box;
+    border-radius: 8px;
+    border: none;
+  }
+  
   .empty-history {
     color: #bbb;
     margin: 0;
+  }
+  
+  @media (max-width: 480px) {
+    .container {
+      padding: 18px;
+    }
+  
+    .mood-buttons,
+    .filter-bar,
+    .action-buttons,
+    .history-card-actions,
+    .history-controls {
+      grid-template-columns: 1fr;
+      flex-direction: column;
+    }
+  
+    .action-buttons,
+    .history-card-actions,
+    .history-controls {
+      display: flex;
+    }
   }

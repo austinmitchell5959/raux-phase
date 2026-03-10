@@ -40,8 +40,29 @@
     <div class="history-section">
       <div class="history-header">
         <h2>Session History</h2>
-        <button id="clearHistoryButton" type="button">Clear History</button>
+        <div class="history-controls">
+          <button id="exportButton" type="button">Export</button>
+          <button id="clearHistoryButton" type="button">Clear History</button>
+        </div>
       </div>
+
+      <div class="filter-bar">
+        <select id="filterMood">
+          <option value="all">All moods</option>
+          <option value="focused">Focused</option>
+          <option value="creative">Creative</option>
+          <option value="calm">Calm</option>
+          <option value="hype">Hype</option>
+        </select>
+
+        <select id="filterMode">
+          <option value="all">All modes</option>
+          <option value="prototype">Prototype</option>
+          <option value="build">Build</option>
+          <option value="test">Test</option>
+        </select>
+      </div>
+
       <div id="historyList">
         <p class="empty-history">No sessions yet.</p>
       </div>
