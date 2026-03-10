@@ -13,6 +13,8 @@ const searchInput = document.getElementById("searchInput");
 const output = document.getElementById("output");
 const outputBox = document.getElementById("outputBox");
 const historyList = document.getElementById("historyList");
+const spotifyButton = document.getElementById("spotifyButton");
+const spotifyStatus = document.getElementById("spotifyStatus");
 
 const totalSessions = document.getElementById("totalSessions");
 const topMood = document.getElementById("topMood");
@@ -21,6 +23,7 @@ const topCategory = document.getElementById("topCategory");
 
 let selectedMood = "";
 let sessionHistory = JSON.parse(localStorage.getItem("rauxSessionHistory")) || [];
+let spotifyConnected = JSON.parse(localStorage.getItem("rauxSpotifyConnected")) || false;
 
 function getRauxType(mood) {
   const lowerMood = mood.toLowerCase();
@@ -50,6 +53,36 @@ function getTimestamp() {
 
 function saveHistory() {
   localStorage.setItem("rauxSessionHistory", JSON.stringify(sessionHistory));
+}
+
+function saveSpotifyState() {
+  localStorage.setItem("rauxSpotifyConnected", JSON.stringify(spotifyConnected));
+}
+
+function updateSpotifyUI() {
+  if (spotifyConnected) {
+    spotifyStatus.textContent = "Spotify connected — prototype view only.";
+    spotifyStatus.classList.add("connected");
+    spotifyButton.innerHTML = `
+      <span class="spotify-icon">
+        <span></span>
+        <span></span>
+        <span></span>
+      </span>
+      <span>Spotify Connected</span>
+    `;
+  } else {
+    spotifyStatus.textContent = "Not connected — prototype mode only.";
+    spotifyStatus.classList.remove("connected");
+    spotifyButton.innerHTML = `
+      <span class="spotify-icon">
+        <span></span>
+        <span></span>
+        <span></span>
+      </span>
+      <span>Connect to Spotify</span>
+    `;
+  }
 }
 
 function getTopValue(key) {
@@ -144,8 +177,8 @@ function renderHistory() {
       card.innerHTML = `
         <strong>${session.sessionName}</strong><br>
         Mode: ${session.mode}<br>
-        Mood: ${session.mood}<br>
         Category: ${session.category}<br>
+        Mood: ${session.mood}<br>
         Type: ${session.rauxType}<br>
         Time: ${session.timestamp}
         <div class="history-card-actions">
@@ -242,6 +275,12 @@ moodButtons.forEach(function(button) {
   });
 });
 
+spotifyButton.addEventListener("click", function() {
+  spotifyConnected = !spotifyConnected;
+  saveSpotifyState();
+  updateSpotifyUI();
+});
+
 startButton.addEventListener("click", function() {
   const sessionName = sessionInput.value.trim();
   const mode = modeInput.value;
@@ -264,6 +303,7 @@ startButton.addEventListener("click", function() {
     Category: ${category}<br>
     Mood: ${selectedMood}<br>
     Suggested Raux Type: ${rauxType}<br>
+    Spotify: ${spotifyConnected ? "Connected (prototype)" : "Not connected"}<br>
     Time: ${timestamp}
   `;
 
@@ -277,6 +317,7 @@ startButton.addEventListener("click", function() {
     category: category,
     mood: selectedMood,
     rauxType: rauxType,
+    spotifyConnected: spotifyConnected,
     timestamp: timestamp,
     isEditing: false
   };
@@ -325,5 +366,6 @@ filterMode.addEventListener("change", renderHistory);
 filterCategory.addEventListener("change", renderHistory);
 searchInput.addEventListener("input", renderHistory);
 
+updateSpotifyUI();
 renderHistory();
 updateStats();

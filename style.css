@@ -8,6 +8,8 @@
     --accent-2: #22c55e;
     --danger: #ef4444;
     --border: rgba(255, 255, 255, 0.08);
+    --spotify: #1db954;
+    --spotify-dark: #169c46;
   }
   
   * {
@@ -72,6 +74,90 @@
   .panel h2 {
     margin-top: 0;
     margin-bottom: 14px;
+  }
+  
+  .spotify-panel {
+    border: 1px solid rgba(29, 185, 84, 0.35);
+    background: linear-gradient(135deg, rgba(20, 26, 45, 0.95), rgba(12, 20, 30, 0.95));
+  }
+  
+  .spotify-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  
+  .spotify-label {
+    margin: 0 0 6px;
+    color: #7ee2a8;
+    font-size: 12px;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+  }
+  
+  .spotify-title {
+    margin: 0;
+  }
+  
+  .spotify-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: linear-gradient(135deg, var(--spotify), var(--spotify-dark));
+    color: white;
+    border: none;
+    border-radius: 999px;
+    padding: 12px 18px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(29, 185, 84, 0.28);
+    transition: transform 0.15s ease, opacity 0.15s ease;
+  }
+  
+  .spotify-button:hover {
+    transform: translateY(-1px);
+    opacity: 0.97;
+  }
+  
+  .spotify-icon {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: #0f1117;
+    position: relative;
+    display: inline-block;
+  }
+  
+  .spotify-icon span {
+    position: absolute;
+    left: 6px;
+    right: 6px;
+    height: 2px;
+    background: white;
+    border-radius: 999px;
+  }
+  
+  .spotify-icon span:nth-child(1) {
+    top: 8px;
+  }
+  
+  .spotify-icon span:nth-child(2) {
+    top: 12px;
+  }
+  
+  .spotify-icon span:nth-child(3) {
+    top: 16px;
+  }
+  
+  .spotify-status {
+    margin: 14px 0 0;
+    color: var(--muted);
+  }
+  
+  .spotify-status.connected {
+    color: #7ee2a8;
   }
   
   input,
@@ -337,5 +423,10 @@
   
     .stats-grid {
       gap: 10px;
+    }
+  
+    .spotify-row {
+      flex-direction: column;
+      align-items: stretch;
     }
   }
