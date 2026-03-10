@@ -14,7 +14,7 @@ body {
     background: #1e1e1e;
     padding: 30px;
     border-radius: 12px;
-    width: 340px;
+    width: 360px;
   }
   
   input,
@@ -25,21 +25,79 @@ body {
     box-sizing: border-box;
   }
   
-  button {
-    margin-top: 14px;
+  .label {
+    margin-top: 16px;
+    margin-bottom: 8px;
+  }
+  
+  .mood-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  
+  .mood-button,
+  #startButton,
+  #resetButton {
     padding: 10px 16px;
     cursor: pointer;
+    border: none;
+    border-radius: 8px;
+  }
+  
+  .mood-button {
+    background: #333;
+    color: white;
+  }
+  
+  .mood-button.active {
+    outline: 2px solid #7cffb2;
+    background: #2f4f40;
+  }
+  
+  .action-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+  }
+  
+  #startButton,
+  #resetButton {
+    flex: 1;
   }
   
   #outputBox {
     margin-top: 20px;
-    padding: 12px;
-    background: #2a2a2a;
-    border-radius: 8px;
+    padding: 14px;
+    border-radius: 10px;
+    transition: background 0.2s ease;
   }
   
   #output {
     margin: 0;
-    color: #7CFFB2;
-    line-height: 1.5;
+    line-height: 1.6;
+  }
+  
+  .neutral {
+    background: #2a2a2a;
+  }
+  
+  .deep-work {
+    background: #1f3b4d;
+  }
+  
+  .idea-sprint {
+    background: #4a2a52;
+  }
+  
+  .soft-session {
+    background: #2d4a3a;
+  }
+  
+  .energy-boost {
+    background: #5a3a1a;
+  }
+  
+  .custom-session {
+    background: #444;
   }

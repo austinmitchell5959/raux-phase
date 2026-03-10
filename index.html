@@ -20,17 +20,20 @@
       <option value="test">Test</option>
     </select>
 
-    <select id="moodInput">
-      <option value="">Select mood</option>
-      <option value="focused">Focused</option>
-      <option value="creative">Creative</option>
-      <option value="calm">Calm</option>
-      <option value="hype">Hype</option>
-    </select>
+    <p class="label">Choose mood</p>
+    <div class="mood-buttons">
+      <button class="mood-button" data-mood="focused" type="button">Focused</button>
+      <button class="mood-button" data-mood="creative" type="button">Creative</button>
+      <button class="mood-button" data-mood="calm" type="button">Calm</button>
+      <button class="mood-button" data-mood="hype" type="button">Hype</button>
+    </div>
 
-    <button id="startButton">Start Session</button>
+    <div class="action-buttons">
+      <button id="startButton" type="button">Start Session</button>
+      <button id="resetButton" type="button">Reset</button>
+    </div>
 
-    <div id="outputBox">
+    <div id="outputBox" class="neutral">
       <p id="output">Waiting for input...</p>
     </div>
   </div>
