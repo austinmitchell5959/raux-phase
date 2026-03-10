@@ -1,21 +1,26 @@
 :root {
-    --bg: #0b1020;
-    --panel: rgba(20, 26, 45, 0.9);
-    --panel-2: rgba(31, 39, 67, 0.9);
-    --text: #f5f7ff;
-    --muted: #a9b1d6;
-    --accent: #8b5cf6;
-    --accent-2: #22c55e;
+    --bg-1: #080c17;
+    --bg-2: #121a30;
+    --panel: rgba(17, 24, 39, 0.78);
+    --panel-2: rgba(25, 35, 58, 0.85);
+    --text: #f7f9ff;
+    --muted: #9fb0d0;
     --border: rgba(255, 255, 255, 0.08);
+  
+    --purple: #8b5cf6;
+    --purple-2: #6d28d9;
+    --green: #22c55e;
+    --green-2: #16a34a;
+    --blue: #2563eb;
+    --orange: #ff6a00;
+    --red: #dc2626;
   
     --spotify: #1db954;
     --spotify-dark: #169c46;
-  
     --apple-1: #ffffff;
-    --apple-2: #f3d0da;
+    --apple-2: #ffd7e2;
     --apple-text: #111111;
-  
-    --soundcloud-1: #ff7a18;
+    --soundcloud-1: #ff8a1f;
     --soundcloud-2: #ff5500;
   }
   
@@ -26,86 +31,148 @@
   body {
     margin: 0;
     font-family: Arial, sans-serif;
-    background:
-      radial-gradient(circle at top left, rgba(139, 92, 246, 0.25), transparent 30%),
-      radial-gradient(circle at top right, rgba(34, 197, 94, 0.18), transparent 25%),
-      linear-gradient(180deg, #090d18 0%, #11182d 100%);
     color: var(--text);
     min-height: 100vh;
+    background:
+      radial-gradient(circle at top left, rgba(139, 92, 246, 0.22), transparent 28%),
+      radial-gradient(circle at top right, rgba(34, 197, 94, 0.16), transparent 24%),
+      linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 100%);
   }
   
   .app-shell {
     width: 100%;
-    padding: 24px 12px 48px;
+    padding: 22px 12px 40px;
     display: flex;
     justify-content: center;
   }
   
   .container {
     width: 100%;
-    max-width: 900px;
+    max-width: 1100px;
   }
   
-  .hero {
-    text-align: center;
-    margin-bottom: 22px;
+  .topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+  }
+  
+  .brand-block h1 {
+    margin: 0;
+    font-size: 38px;
   }
   
   .eyebrow {
-    color: var(--accent-2);
+    margin: 0 0 6px;
     font-size: 12px;
     letter-spacing: 2px;
-    margin: 0 0 8px;
+    color: #7ee2a8;
   }
   
-  .hero h1 {
-    margin: 0;
-    font-size: 40px;
+  .topbar-badges {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
   }
   
-  .hero-text {
-    margin-top: 10px;
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    border: 1px solid var(--border);
+    background: rgba(255,255,255,0.05);
+  }
+  
+  .status-pill.live {
+    color: white;
+    background: linear-gradient(135deg, var(--purple), var(--purple-2));
+  }
+  
+  .status-pill.secure {
+    color: white;
+    background: linear-gradient(135deg, var(--green), var(--green-2));
+  }
+  
+  .status-pill.subtle {
     color: var(--muted);
   }
   
   .panel {
     background: var(--panel);
     border: 1px solid var(--border);
-    border-radius: 18px;
+    border-radius: 22px;
     padding: 22px;
-    backdrop-filter: blur(10px);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.28);
-    margin-bottom: 20px;
+    box-shadow: 0 14px 44px rgba(0, 0, 0, 0.28);
+    backdrop-filter: blur(12px);
+    margin-bottom: 18px;
   }
   
-  .panel h2 {
-    margin-top: 0;
-    margin-bottom: 14px;
+  .hero {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 18px;
+    flex-wrap: wrap;
   }
   
-  .music-panel {
-    border: 1px solid rgba(255, 255, 255, 0.1);
+  .hero h2 {
+    margin: 0 0 8px;
+    font-size: 26px;
   }
   
-  .music-header {
-    margin-bottom: 14px;
+  .hero-text {
+    margin: 0;
+    color: var(--muted);
+    max-width: 640px;
   }
   
-  .music-label {
-    margin: 0 0 6px;
-    color: #7ee2a8;
+  .mini-stat {
+    min-width: 180px;
+    padding: 16px;
+    border-radius: 18px;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+  }
+  
+  .mini-stat-label {
+    display: block;
+    color: var(--muted);
     font-size: 12px;
-    letter-spacing: 1.2px;
-    text-transform: uppercase;
+    margin-bottom: 8px;
   }
   
-  .music-title {
+  .mini-stat-value {
+    font-size: 24px;
+    font-weight: bold;
+  }
+  
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+  }
+  
+  .section-kicker {
+    margin: 0 0 4px;
+    color: #7ee2a8;
+    font-size: 11px;
+    letter-spacing: 1.6px;
+  }
+  
+  .section-header h2 {
     margin: 0;
   }
   
   .music-buttons-grid {
     display: grid;
-    grid-template-columns: 1fr;
     gap: 12px;
   }
   
@@ -122,7 +189,8 @@
     transition: transform 0.15s ease, opacity 0.15s ease;
   }
   
-  .music-service-button:hover {
+  .music-service-button:hover,
+  button:hover {
     transform: translateY(-1px);
     opacity: 0.97;
   }
@@ -156,7 +224,6 @@
   .spotify-button {
     background: linear-gradient(135deg, var(--spotify), var(--spotify-dark));
     color: white;
-    box-shadow: 0 8px 20px rgba(29, 185, 84, 0.25);
   }
   
   .spotify-icon {
@@ -173,22 +240,13 @@
     border-radius: 999px;
   }
   
-  .spotify-icon span:nth-child(1) {
-    top: 11px;
-  }
-  
-  .spotify-icon span:nth-child(2) {
-    top: 17px;
-  }
-  
-  .spotify-icon span:nth-child(3) {
-    top: 23px;
-  }
+  .spotify-icon span:nth-child(1) { top: 11px; }
+  .spotify-icon span:nth-child(2) { top: 17px; }
+  .spotify-icon span:nth-child(3) { top: 23px; }
   
   .apple-button {
     background: linear-gradient(135deg, var(--apple-1), var(--apple-2));
     color: var(--apple-text);
-    box-shadow: 0 8px 20px rgba(255, 255, 255, 0.12);
   }
   
   .apple-icon {
@@ -201,11 +259,10 @@
   .soundcloud-button {
     background: linear-gradient(135deg, var(--soundcloud-1), var(--soundcloud-2));
     color: white;
-    box-shadow: 0 8px 20px rgba(255, 85, 0, 0.25);
   }
   
   .soundcloud-icon {
-    background: rgba(255, 255, 255, 0.14);
+    background: rgba(255,255,255,0.14);
     position: relative;
     overflow: hidden;
   }
@@ -263,15 +320,30 @@
   .soundcloud-icon .bars span:nth-child(3) { height: 12px; }
   .soundcloud-icon .bars span:nth-child(4) { height: 8px; }
   
-  .music-status-stack {
+  .service-status-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
     margin-top: 14px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
+  }
+  
+  .service-status-card {
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    padding: 14px;
+    border-radius: 16px;
+  }
+  
+  .service-status-label {
+    display: block;
+    color: var(--muted);
+    font-size: 12px;
+    margin-bottom: 8px;
   }
   
   .service-status {
     margin: 0;
+    line-height: 1.5;
     color: var(--muted);
   }
   
@@ -279,24 +351,35 @@
     color: #7ee2a8;
   }
   
+  .dashboard-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr;
+    gap: 18px;
+  }
+  
+  .side-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+  
   input,
   select {
     width: 100%;
-    padding: 12px;
+    padding: 12px 14px;
     margin-top: 10px;
-    border-radius: 12px;
+    border-radius: 14px;
     border: 1px solid var(--border);
-    background: rgba(255, 255, 255, 0.04);
+    background: rgba(255,255,255,0.04);
     color: var(--text);
   }
   
   input::placeholder {
-    color: #9ca3af;
+    color: #91a0be;
   }
   
   .label {
-    margin-top: 18px;
-    margin-bottom: 8px;
+    margin: 18px 0 8px;
     color: var(--muted);
   }
   
@@ -306,43 +389,21 @@
     gap: 10px;
   }
   
-  .mood-button,
-  #startButton,
-  #resetButton,
-  #clearHistoryButton,
-  #exportButton,
-  .edit-button,
-  .delete-button,
-  .save-edit-button,
-  .cancel-edit-button {
-    padding: 11px 14px;
-    cursor: pointer;
+  button {
     border: none;
-    border-radius: 12px;
+    border-radius: 14px;
+    padding: 11px 14px;
     color: white;
+    cursor: pointer;
     transition: transform 0.15s ease, opacity 0.15s ease, background 0.2s ease;
   }
   
-  .mood-button:hover,
-  #startButton:hover,
-  #resetButton:hover,
-  #clearHistoryButton:hover,
-  #exportButton:hover,
-  .edit-button:hover,
-  .delete-button:hover,
-  .save-edit-button:hover,
-  .cancel-edit-button:hover {
-    transform: translateY(-1px);
-    opacity: 0.96;
-  }
-  
   .mood-button {
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(255,255,255,0.08);
   }
   
   .mood-button.active {
-    background: linear-gradient(135deg, #8b5cf6, #22c55e);
-    color: white;
+    background: linear-gradient(135deg, var(--purple), var(--green));
   }
   
   .action-buttons {
@@ -353,7 +414,7 @@
   
   #startButton {
     flex: 1;
-    background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+    background: linear-gradient(135deg, var(--purple), var(--purple-2));
   }
   
   #resetButton {
@@ -362,10 +423,9 @@
   }
   
   #outputBox {
-    margin-top: 20px;
+    margin-top: 18px;
     padding: 16px;
-    border-radius: 14px;
-    transition: background 0.2s ease;
+    border-radius: 16px;
     border: 1px solid rgba(255,255,255,0.06);
   }
   
@@ -375,7 +435,7 @@
   }
   
   .neutral {
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(255,255,255,0.05);
   }
   
   .deep-work {
@@ -398,11 +458,35 @@
     background: linear-gradient(135deg, rgba(107, 114, 128, 0.35), rgba(55, 65, 81, 0.35));
   }
   
+  .route-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  
+  .route-item {
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 14px;
+  }
+  
+  .route-label {
+    display: block;
+    color: var(--muted);
+    font-size: 12px;
+    margin-bottom: 8px;
+  }
+  
+  .route-value {
+    font-size: 18px;
+    font-weight: bold;
+  }
+  
   .stats-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: 1fr 1fr;
     gap: 12px;
-    margin-bottom: 20px;
   }
   
   .stat-card {
@@ -410,7 +494,6 @@
     border: 1px solid var(--border);
     border-radius: 16px;
     padding: 16px;
-    text-align: left;
   }
   
   .stat-label {
@@ -426,25 +509,14 @@
     font-weight: bold;
   }
   
-  .history-section {
-    text-align: left;
-  }
-  
-  .history-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
-  }
-  
   .history-controls {
     display: flex;
     gap: 8px;
+    flex-wrap: wrap;
   }
   
   #exportButton {
-    background: #2563eb;
+    background: var(--blue);
   }
   
   #clearHistoryButton {
@@ -452,14 +524,13 @@
   }
   
   .search-bar {
-    margin-top: 14px;
+    margin-bottom: 12px;
   }
   
   .filter-bar {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
     gap: 10px;
-    margin-top: 12px;
   }
   
   #historyList {
@@ -470,11 +541,11 @@
   }
   
   .history-card {
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(255,255,255,0.05);
     border: 1px solid var(--border);
-    border-radius: 14px;
+    border-radius: 16px;
     padding: 14px;
-    line-height: 1.6;
+    line-height: 1.65;
   }
   
   .history-card strong {
@@ -486,15 +557,16 @@
     display: flex;
     gap: 8px;
     margin-top: 12px;
+    flex-wrap: wrap;
   }
   
   .edit-button,
   .save-edit-button {
-    background: #16a34a;
+    background: var(--green-2);
   }
   
   .delete-button {
-    background: #dc2626;
+    background: var(--red);
   }
   
   .cancel-edit-button {
@@ -504,11 +576,6 @@
   .edit-input {
     width: 100%;
     margin-top: 10px;
-    padding: 10px;
-    border-radius: 10px;
-    border: 1px solid var(--border);
-    background: rgba(255,255,255,0.05);
-    color: white;
   }
   
   .empty-history {
@@ -516,31 +583,35 @@
     margin: 0;
   }
   
-  @media (max-width: 760px) {
-    .stats-grid {
-      grid-template-columns: 1fr 1fr;
+  @media (max-width: 900px) {
+    .dashboard-grid {
+      grid-template-columns: 1fr;
     }
   
-    .filter-bar {
+    .service-status-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  @media (max-width: 700px) {
+    .filter-bar,
+    .route-grid,
+    .stats-grid {
       grid-template-columns: 1fr;
     }
   }
   
   @media (max-width: 520px) {
-    .hero h1 {
+    .brand-block h1 {
       font-size: 30px;
     }
   
     .mood-buttons,
-    .stats-grid,
     .action-buttons,
     .history-controls,
-    .history-card-actions {
+    .history-card-actions,
+    .topbar-badges {
       display: flex;
       flex-direction: column;
-    }
-  
-    .stats-grid {
-      gap: 10px;
     }
   }

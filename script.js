@@ -27,9 +27,14 @@ const topMood = document.getElementById("topMood");
 const topMode = document.getElementById("topMode");
 const topCategory = document.getElementById("topCategory");
 
+const connectedServicesCount = document.getElementById("connectedServicesCount");
+const primarySource = document.getElementById("primarySource");
+const sessionState = document.getElementById("sessionState");
+const lastCategory = document.getElementById("lastCategory");
+const lastMood = document.getElementById("lastMood");
+
 let selectedMood = "";
 let sessionHistory = JSON.parse(localStorage.getItem("rauxSessionHistory")) || [];
-
 let musicConnections = JSON.parse(localStorage.getItem("rauxMusicConnections")) || {
   spotify: false,
   appleMusic: false,
@@ -70,43 +75,56 @@ function saveMusicConnections() {
   localStorage.setItem("rauxMusicConnections", JSON.stringify(musicConnections));
 }
 
+function getConnectedCount() {
+  return Object.values(musicConnections).filter(Boolean).length;
+}
+
+function getPrimarySource() {
+  if (musicConnections.spotify) return "Spotify";
+  if (musicConnections.appleMusic) return "Apple Music";
+  if (musicConnections.soundcloud) return "SoundCloud";
+  return "None";
+}
+
 function updateMusicUI() {
   if (musicConnections.spotify) {
-    spotifyStatus.textContent = "Spotify: connected — prototype only.";
+    spotifyStatus.textContent = "Connected — prototype only.";
     spotifyStatus.classList.add("connected");
     spotifyButton.querySelector(".service-action").textContent = "Spotify Connected";
   } else {
-    spotifyStatus.textContent = "Spotify: not connected — prototype only.";
+    spotifyStatus.textContent = "Not connected — prototype only.";
     spotifyStatus.classList.remove("connected");
     spotifyButton.querySelector(".service-action").textContent = "Connect to Spotify";
   }
 
   if (musicConnections.appleMusic) {
-    appleMusicStatus.textContent = "Apple Music: connected — prototype only.";
+    appleMusicStatus.textContent = "Connected — prototype only.";
     appleMusicStatus.classList.add("connected");
     appleMusicButton.querySelector(".service-action").textContent = "Apple Music Connected";
   } else {
-    appleMusicStatus.textContent = "Apple Music: not connected — prototype only.";
+    appleMusicStatus.textContent = "Not connected — prototype only.";
     appleMusicStatus.classList.remove("connected");
     appleMusicButton.querySelector(".service-action").textContent = "Connect to Apple Music";
   }
 
   if (musicConnections.soundcloud) {
-    soundcloudStatus.textContent = "SoundCloud: connected — prototype only.";
+    soundcloudStatus.textContent = "Connected — prototype only.";
     soundcloudStatus.classList.add("connected");
     soundcloudButton.querySelector(".service-action").textContent = "SoundCloud Connected";
   } else {
-    soundcloudStatus.textContent = "SoundCloud: not connected — prototype only.";
+    soundcloudStatus.textContent = "Not connected — prototype only.";
     soundcloudStatus.classList.remove("connected");
     soundcloudButton.querySelector(".service-action").textContent = "Connect to SoundCloud";
   }
+
+  connectedServicesCount.textContent = `${getConnectedCount()} / 3`;
+  primarySource.textContent = getPrimarySource();
 }
 
 function getTopValue(key) {
   if (sessionHistory.length === 0) return "-";
 
   const counts = {};
-
   sessionHistory.forEach(function(session) {
     counts[session[key]] = (counts[session[key]] || 0) + 1;
   });
@@ -131,6 +149,20 @@ function updateStats() {
   topCategory.textContent = getTopValue("category");
 }
 
+function updateRoutePanelFromLatest() {
+  if (sessionHistory.length === 0) {
+    sessionState.textContent = "Idle";
+    lastCategory.textContent = "-";
+    lastMood.textContent = "-";
+    return;
+  }
+
+  const latest = sessionHistory[sessionHistory.length - 1];
+  sessionState.textContent = "Session Logged";
+  lastCategory.textContent = latest.category;
+  lastMood.textContent = latest.mood;
+}
+
 function renderHistory() {
   const moodFilterValue = filterMood.value;
   const modeFilterValue = filterMode.value;
@@ -140,21 +172,15 @@ function renderHistory() {
   let filteredHistory = sessionHistory.slice().reverse();
 
   if (moodFilterValue !== "all") {
-    filteredHistory = filteredHistory.filter(function(session) {
-      return session.mood === moodFilterValue;
-    });
+    filteredHistory = filteredHistory.filter(session => session.mood === moodFilterValue);
   }
 
   if (modeFilterValue !== "all") {
-    filteredHistory = filteredHistory.filter(function(session) {
-      return session.mode === modeFilterValue;
-    });
+    filteredHistory = filteredHistory.filter(session => session.mode === modeFilterValue);
   }
 
   if (categoryFilterValue !== "all") {
-    filteredHistory = filteredHistory.filter(function(session) {
-      return session.category === categoryFilterValue;
-    });
+    filteredHistory = filteredHistory.filter(session => session.category === categoryFilterValue);
   }
 
   if (searchValue !== "") {
@@ -172,6 +198,7 @@ function renderHistory() {
   if (filteredHistory.length === 0) {
     historyList.innerHTML = '<p class="empty-history">No matching sessions.</p>';
     updateStats();
+    updateRoutePanelFromLatest();
     return;
   }
 
@@ -213,38 +240,30 @@ function renderHistory() {
 
   attachCardEvents();
   updateStats();
+  updateRoutePanelFromLatest();
 }
 
 function attachCardEvents() {
-  const deleteButtons = document.querySelectorAll(".delete-button");
-  const editButtons = document.querySelectorAll(".edit-button");
-  const saveEditButtons = document.querySelectorAll(".save-edit-button");
-  const cancelEditButtons = document.querySelectorAll(".cancel-edit-button");
-
-  deleteButtons.forEach(function(button) {
+  document.querySelectorAll(".delete-button").forEach(function(button) {
     button.addEventListener("click", function() {
       const id = Number(button.dataset.id);
-      sessionHistory = sessionHistory.filter(function(session) {
-        return session.id !== id;
-      });
+      sessionHistory = sessionHistory.filter(session => session.id !== id);
       saveHistory();
       renderHistory();
     });
   });
 
-  editButtons.forEach(function(button) {
+  document.querySelectorAll(".edit-button").forEach(function(button) {
     button.addEventListener("click", function() {
       const id = Number(button.dataset.id);
-
       sessionHistory.forEach(function(session) {
         session.isEditing = session.id === id;
       });
-
       renderHistory();
     });
   });
 
-  saveEditButtons.forEach(function(button) {
+  document.querySelectorAll(".save-edit-button").forEach(function(button) {
     button.addEventListener("click", function() {
       const id = Number(button.dataset.id);
       const input = document.querySelector(`.edit-input[data-id="${id}"]`);
@@ -267,17 +286,15 @@ function attachCardEvents() {
     });
   });
 
-  cancelEditButtons.forEach(function(button) {
+  document.querySelectorAll(".cancel-edit-button").forEach(function(button) {
     button.addEventListener("click", function() {
       const id = Number(button.dataset.id);
-
       sessionHistory = sessionHistory.map(function(session) {
         if (session.id === id) {
           session.isEditing = false;
         }
         return session;
       });
-
       renderHistory();
     });
   });
@@ -286,11 +303,7 @@ function attachCardEvents() {
 moodButtons.forEach(function(button) {
   button.addEventListener("click", function() {
     selectedMood = button.dataset.mood;
-
-    moodButtons.forEach(function(btn) {
-      btn.classList.remove("active");
-    });
-
+    moodButtons.forEach(btn => btn.classList.remove("active"));
     button.classList.add("active");
   });
 });
@@ -322,6 +335,7 @@ startButton.addEventListener("click", function() {
     output.textContent = "Please fill out session name, mode, category, and mood.";
     clearBoxClasses();
     outputBox.classList.add("neutral");
+    sessionState.textContent = "Incomplete";
     return;
   }
 
@@ -338,6 +352,7 @@ startButton.addEventListener("click", function() {
     Spotify: ${musicConnections.spotify ? "Connected (prototype)" : "Not connected"}<br>
     Apple Music: ${musicConnections.appleMusic ? "Connected (prototype)" : "Not connected"}<br>
     SoundCloud: ${musicConnections.soundcloud ? "Connected (prototype)" : "Not connected"}<br>
+    Primary Source: ${getPrimarySource()}<br>
     Time: ${timestamp}
   `;
 
@@ -346,15 +361,15 @@ startButton.addEventListener("click", function() {
 
   const newSession = {
     id: Date.now(),
-    sessionName: sessionName,
-    mode: mode,
-    category: category,
+    sessionName,
+    mode,
+    category,
     mood: selectedMood,
-    rauxType: rauxType,
+    rauxType,
     spotifyConnected: musicConnections.spotify,
     appleMusicConnected: musicConnections.appleMusic,
     soundcloudConnected: musicConnections.soundcloud,
-    timestamp: timestamp,
+    timestamp,
     isEditing: false
   };
 
@@ -369,13 +384,12 @@ resetButton.addEventListener("click", function() {
   categoryInput.value = "";
   selectedMood = "";
 
-  moodButtons.forEach(function(button) {
-    button.classList.remove("active");
-  });
+  moodButtons.forEach(button => button.classList.remove("active"));
 
   output.textContent = "Waiting for input...";
   clearBoxClasses();
   outputBox.classList.add("neutral");
+  sessionState.textContent = "Idle";
 });
 
 clearHistoryButton.addEventListener("click", function() {
@@ -405,3 +419,4 @@ searchInput.addEventListener("input", renderHistory);
 updateMusicUI();
 renderHistory();
 updateStats();
+updateRoutePanelFromLatest();
