@@ -1,4 +1,6 @@
 const sessionInput = document.getElementById("sessionInput");
+const contextInput = document.getElementById("contextInput");
+const goalInput = document.getElementById("goalInput");
 const modeInput = document.getElementById("modeInput");
 const categoryInput = document.getElementById("categoryInput");
 const notesInput = document.getElementById("notesInput");
@@ -20,6 +22,10 @@ const historyList = document.getElementById("historyList");
 const feedbackMessage = document.getElementById("feedbackMessage");
 const undoBanner = document.getElementById("undoBanner");
 const undoDeleteButton = document.getElementById("undoDeleteButton");
+
+const recommendationWhy = document.getElementById("recommendationWhy");
+const thumbsUpButton = document.getElementById("thumbsUpButton");
+const thumbsDownButton = document.getElementById("thumbsDownButton");
 
 const timerDisplay = document.getElementById("timerDisplay");
 const timerStartButton = document.getElementById("timerStartButton");
@@ -50,6 +56,7 @@ const lastMood = document.getElementById("lastMood");
 let selectedMood = "";
 let favoritesOnly = false;
 let lastDeletedSession = null;
+let lastCreatedSessionId = null;
 
 let sessionHistory = JSON.parse(localStorage.getItem("rauxSessionHistory")) || [];
 let musicConnections = JSON.parse(localStorage.getItem("rauxMusicConnections")) || {
@@ -110,26 +117,140 @@ function getRauxType(mood) {
   return "Custom Session";
 }
 
-function getRecommendedSource(category, mood) {
-  if (category === "focus" || mood === "focused") return "Spotify";
-  if (category === "creative" || mood === "creative") return "SoundCloud";
-  if (category === "recovery" || mood === "calm") return "Apple Music";
-  if (category === "energy" || mood === "hype") return musicConnections.soundcloud ? "SoundCloud" : "Spotify";
+function getMemoryBias(service, context, goal, mood, category) {
+  let bias = 0;
+
+  sessionHistory.forEach(function (session) {
+    if (session.recommendedSource !== service) return;
+
+    let matchPoints = 0;
+    if (session.context === context) matchPoints += 1;
+    if (session.goal === goal) matchPoints += 1;
+    if (session.mood === mood) matchPoints += 1;
+    if (session.category === category) matchPoints += 1;
+
+    if (matchPoints > 0) {
+      if (session.feedback === "good") bias += matchPoints * 4;
+      if (session.feedback === "bad") bias -= matchPoints * 4;
+    }
+  });
+
+  return bias;
+}
+
+function getBaseRecommendation(context, goal, category, mood) {
+  if (context === "driving" || goal === "safe-drive") return "Spotify";
+  if (context === "working" || context === "studying" || goal === "focus" || category === "focus" || mood === "focused") return "Spotify";
+  if (goal === "discover" || goal === "brainstorm" || category === "creative" || mood === "creative") return "SoundCloud";
+  if (context === "relaxing" || context === "late-night" || goal === "calm-down" || category === "recovery" || mood === "calm") return "Apple Music";
+  if (context === "gym" || goal === "energize" || category === "energy" || mood === "hype") return "SoundCloud";
   return "Spotify";
 }
 
-function getSessionScore(mode, category, mood, recommended) {
-  let score = 55;
+function getRecommendedSource(context, goal, category, mood) {
+  const services = ["Spotify", "Apple Music", "SoundCloud"];
+  const scores = {
+    "Spotify": 50,
+    "Apple Music": 50,
+    "SoundCloud": 50
+  };
 
-  if (mode && category && mood) score += 15;
+  const base = getBaseRecommendation(context, goal, category, mood);
+  scores[base] += 18;
+
+  if (context === "driving") scores["Spotify"] += 12;
+  if (context === "working" || context === "studying") scores["Spotify"] += 10;
+  if (context === "relaxing" || context === "late-night") scores["Apple Music"] += 10;
+  if (context === "gym") scores["SoundCloud"] += 10;
+
+  if (goal === "focus") scores["Spotify"] += 10;
+  if (goal === "discover" || goal === "brainstorm") scores["SoundCloud"] += 12;
+  if (goal === "calm-down") scores["Apple Music"] += 12;
+  if (goal === "energize") scores["SoundCloud"] += 10;
+  if (goal === "safe-drive") scores["Spotify"] += 14;
+
+  if (category === "focus") scores["Spotify"] += 8;
+  if (category === "creative") scores["SoundCloud"] += 8;
+  if (category === "recovery") scores["Apple Music"] += 8;
+  if (category === "energy") scores["SoundCloud"] += 8;
+
+  if (mood === "focused") scores["Spotify"] += 8;
+  if (mood === "creative") scores["SoundCloud"] += 8;
+  if (mood === "calm") scores["Apple Music"] += 8;
+  if (mood === "hype") scores["SoundCloud"] += 8;
+
+  services.forEach(function (service) {
+    scores[service] += getMemoryBias(service, context, goal, mood, category);
+  });
+
+  if (musicConnections.spotify) scores["Spotify"] += 6;
+  if (musicConnections.appleMusic) scores["Apple Music"] += 6;
+  if (musicConnections.soundcloud) scores["SoundCloud"] += 6;
+
+  let winner = "Spotify";
+  let max = -Infinity;
+
+  services.forEach(function (service) {
+    if (scores[service] > max) {
+      max = scores[service];
+      winner = service;
+    }
+  });
+
+  return { winner, scores };
+}
+
+function buildRecommendationWhy(context, goal, category, mood, recommended, scores) {
+  const reasons = [];
+
+  reasons.push(`Recommended ${recommended} based on your current session profile.`);
+
+  if (context) reasons.push(`Context selected: ${context}.`);
+  if (goal) reasons.push(`Goal selected: ${goal}.`);
+  if (category) reasons.push(`Category selected: ${category}.`);
+  if (mood) reasons.push(`Mood selected: ${mood}.`);
+
+  if (recommended === "Spotify" && musicConnections.spotify) {
+    reasons.push("Spotify is currently connected, which increased recommendation confidence.");
+  }
+
+  if (recommended === "Apple Music" && musicConnections.appleMusic) {
+    reasons.push("Apple Music is currently connected, which increased recommendation confidence.");
+  }
+
+  if (recommended === "SoundCloud" && musicConnections.soundcloud) {
+    reasons.push("SoundCloud is currently connected, which increased recommendation confidence.");
+  }
+
+  const bestScore = scores[recommended];
+  if (bestScore >= 85) {
+    reasons.push("Confidence: High.");
+  } else if (bestScore >= 70) {
+    reasons.push("Confidence: Medium.");
+  } else {
+    reasons.push("Confidence: Early-stage.");
+  }
+
+  return reasons.join(" ");
+}
+
+function getSessionScore(mode, category, mood, recommended, context, goal) {
+  let score = 45;
+
+  if (mode && category && mood && context && goal) score += 20;
   if (recommended === "Spotify" && musicConnections.spotify) score += 10;
   if (recommended === "Apple Music" && musicConnections.appleMusic) score += 10;
   if (recommended === "SoundCloud" && musicConnections.soundcloud) score += 10;
 
-  if (category === "focus" && mood === "focused") score += 10;
-  if (category === "creative" && mood === "creative") score += 10;
-  if (category === "recovery" && mood === "calm") score += 10;
-  if (category === "energy" && mood === "hype") score += 10;
+  if (category === "focus" && mood === "focused") score += 8;
+  if (category === "creative" && mood === "creative") score += 8;
+  if (category === "recovery" && mood === "calm") score += 8;
+  if (category === "energy" && mood === "hype") score += 8;
+
+  if (context === "driving" && goal === "safe-drive") score += 8;
+  if (context === "working" && goal === "focus") score += 8;
+  if (context === "relaxing" && goal === "calm-down") score += 8;
+  if (context === "gym" && goal === "energize") score += 8;
 
   return Math.min(score, 100);
 }
@@ -156,32 +277,54 @@ function setSelectedMood(mood) {
 function applyPreset(presetName) {
   if (presetName === "deep-focus") {
     sessionInput.value = "Deep Focus Session";
+    contextInput.value = "working";
+    goalInput.value = "focus";
     modeInput.value = "build";
     categoryInput.value = "focus";
     notesInput.value = "Focused work block.";
     setSelectedMood("focused");
   } else if (presetName === "creative-sprint") {
     sessionInput.value = "Creative Sprint";
+    contextInput.value = "working";
+    goalInput.value = "brainstorm";
     modeInput.value = "prototype";
     categoryInput.value = "creative";
     notesInput.value = "Idea generation and creative flow.";
     setSelectedMood("creative");
   } else if (presetName === "recovery-reset") {
     sessionInput.value = "Recovery Reset";
+    contextInput.value = "relaxing";
+    goalInput.value = "calm-down";
     modeInput.value = "test";
     categoryInput.value = "recovery";
     notesInput.value = "Calm reset session.";
     setSelectedMood("calm");
   } else if (presetName === "energy-lift") {
     sessionInput.value = "Energy Lift";
+    contextInput.value = "gym";
+    goalInput.value = "energize";
     modeInput.value = "build";
     categoryInput.value = "energy";
     notesInput.value = "High-energy motivation session.";
     setSelectedMood("hype");
   }
 
-  const recommended = getRecommendedSource(categoryInput.value, selectedMood);
-  recommendedSource.textContent = recommended;
+  const recommendation = getRecommendedSource(
+    contextInput.value,
+    goalInput.value,
+    categoryInput.value,
+    selectedMood
+  );
+
+  recommendedSource.textContent = recommendation.winner;
+  recommendationWhy.textContent = buildRecommendationWhy(
+    contextInput.value,
+    goalInput.value,
+    categoryInput.value,
+    selectedMood,
+    recommendation.winner,
+    recommendation.scores
+  );
   sessionState.textContent = "Preset Loaded";
   setFeedback("Preset applied.");
 }
@@ -338,6 +481,8 @@ function renderHistory() {
         session.mode.toLowerCase().includes(searchValue) ||
         session.mood.toLowerCase().includes(searchValue) ||
         session.category.toLowerCase().includes(searchValue) ||
+        session.context.toLowerCase().includes(searchValue) ||
+        session.goal.toLowerCase().includes(searchValue) ||
         session.rauxType.toLowerCase().includes(searchValue) ||
         (session.notes && session.notes.toLowerCase().includes(searchValue))
       );
@@ -380,15 +525,20 @@ function renderHistory() {
         <strong>${session.sessionName}</strong>
         <div class="badge-row">
           ${session.favorite ? '<span class="info-badge favorite">★ FAVORITE</span>' : ""}
+          ${session.feedback === "good" ? '<span class="info-badge good">GOOD MATCH</span>' : ""}
+          ${session.feedback === "bad" ? '<span class="info-badge bad">BAD MATCH</span>' : ""}
           <span class="info-badge">${session.mode.toUpperCase()}</span>
           <span class="info-badge">${session.category.toUpperCase()}</span>
           <span class="info-badge">${session.mood.toUpperCase()}</span>
+          <span class="info-badge">${session.context.toUpperCase()}</span>
+          <span class="info-badge">${session.goal.toUpperCase()}</span>
           <span class="info-badge">${session.rauxType}</span>
           <span class="info-badge">SCORE ${session.score}</span>
           <span class="info-badge">${session.recommendedSource}</span>
           <span class="info-badge">${session.duration}</span>
         </div>
         ${session.notes ? `Notes: ${session.notes}<br>` : ""}
+        Why: ${session.whyRecommendation}<br>
         Spotify: ${session.spotifyConnected ? "Yes" : "No"}<br>
         Apple Music: ${session.appleMusicConnected ? "Yes" : "No"}<br>
         SoundCloud: ${session.soundcloudConnected ? "Yes" : "No"}<br>
@@ -438,7 +588,8 @@ function attachCardEvents() {
         sessionName: `${original.sessionName} Copy`,
         timestamp: getTimestamp(),
         isEditing: false,
-        favorite: false
+        favorite: false,
+        feedback: ""
       };
 
       sessionHistory.push(clone);
@@ -511,6 +662,21 @@ function attachCardEvents() {
   });
 }
 
+function setSessionFeedback(value) {
+  if (!lastCreatedSessionId) return;
+
+  sessionHistory = sessionHistory.map(function (session) {
+    if (session.id === lastCreatedSessionId) {
+      session.feedback = value;
+    }
+    return session;
+  });
+
+  saveHistory();
+  renderHistory();
+  setFeedback(value === "good" ? "Marked as a good match." : "Marked as a bad match.");
+}
+
 moodButtons.forEach(function (button) {
   button.addEventListener("click", function () {
     setSelectedMood(button.dataset.mood);
@@ -555,14 +721,24 @@ timerStartButton.addEventListener("click", startTimer);
 timerPauseButton.addEventListener("click", pauseTimer);
 timerResetButton.addEventListener("click", resetTimer);
 
+thumbsUpButton.addEventListener("click", function () {
+  setSessionFeedback("good");
+});
+
+thumbsDownButton.addEventListener("click", function () {
+  setSessionFeedback("bad");
+});
+
 startButton.addEventListener("click", function () {
   const sessionName = sessionInput.value.trim();
+  const context = contextInput.value;
+  const goal = goalInput.value;
   const mode = modeInput.value;
   const category = categoryInput.value;
   const notes = notesInput.value.trim();
 
-  if (sessionName === "" || mode === "" || category === "" || selectedMood === "") {
-    output.textContent = "Please complete session name, mode, category, and mood before starting.";
+  if (sessionName === "" || context === "" || goal === "" || mode === "" || category === "" || selectedMood === "") {
+    output.textContent = "Please complete session name, context, goal, mode, category, and mood before starting.";
     clearBoxClasses();
     outputBox.classList.add("neutral");
     sessionState.textContent = "Incomplete";
@@ -571,17 +747,22 @@ startButton.addEventListener("click", function () {
   }
 
   const rauxType = getRauxType(selectedMood);
-  const recommended = getRecommendedSource(category, selectedMood);
-  const score = getSessionScore(mode, category, selectedMood, recommended);
+  const recommendation = getRecommendedSource(context, goal, category, selectedMood);
+  const recommended = recommendation.winner;
+  const whyText = buildRecommendationWhy(context, goal, category, selectedMood, recommended, recommendation.scores);
+  const score = getSessionScore(mode, category, selectedMood, recommended, context, goal);
   const boxClass = getBoxClass(rauxType);
   const timestamp = getTimestamp();
   const duration = formatTime(timerSeconds);
 
   recommendedSource.textContent = recommended;
   sessionScore.textContent = score;
+  recommendationWhy.textContent = whyText;
 
   output.innerHTML = `
     Session: ${sessionName}<br>
+    Context: ${context}<br>
+    Goal: ${goal}<br>
     Mode: ${mode}<br>
     Category: ${category}<br>
     Mood: ${selectedMood}<br>
@@ -603,12 +784,15 @@ startButton.addEventListener("click", function () {
   const newSession = {
     id: Date.now(),
     sessionName,
+    context,
+    goal,
     mode,
     category,
     mood: selectedMood,
     notes,
     rauxType,
     recommendedSource: recommended,
+    whyRecommendation: whyText,
     score,
     duration,
     spotifyConnected: musicConnections.spotify,
@@ -616,9 +800,11 @@ startButton.addEventListener("click", function () {
     soundcloudConnected: musicConnections.soundcloud,
     timestamp,
     isEditing: false,
-    favorite: false
+    favorite: false,
+    feedback: ""
   };
 
+  lastCreatedSessionId = newSession.id;
   sessionHistory.push(newSession);
   saveHistory();
   renderHistory();
@@ -628,6 +814,8 @@ startButton.addEventListener("click", function () {
 
 resetButton.addEventListener("click", function () {
   sessionInput.value = "";
+  contextInput.value = "";
+  goalInput.value = "";
   modeInput.value = "";
   categoryInput.value = "";
   notesInput.value = "";
@@ -636,6 +824,7 @@ resetButton.addEventListener("click", function () {
   moodButtons.forEach(button => button.classList.remove("active"));
 
   output.textContent = "Ready to create your next session.";
+  recommendationWhy.textContent = "Complete a session profile to see recommendation logic.";
   clearBoxClasses();
   outputBox.classList.add("neutral");
   sessionState.textContent = "Idle";

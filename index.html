@@ -121,11 +121,31 @@
             <div>
               <p class="section-kicker">CREATE</p>
               <h2>Create a New Session</h2>
-              <p class="section-helper">Set the mode, category, mood, and notes to generate a smarter session profile.</p>
+              <p class="section-helper">Set the context, goal, mode, category, and mood to generate a smarter session profile.</p>
             </div>
           </div>
 
           <input type="text" id="sessionInput" placeholder="Name this session" />
+
+          <select id="contextInput">
+            <option value="">Choose a context</option>
+            <option value="working">Working</option>
+            <option value="driving">Driving</option>
+            <option value="studying">Studying</option>
+            <option value="gym">Gym</option>
+            <option value="relaxing">Relaxing</option>
+            <option value="late-night">Late Night</option>
+          </select>
+
+          <select id="goalInput">
+            <option value="">Choose a goal</option>
+            <option value="focus">Focus</option>
+            <option value="discover">Discover Music</option>
+            <option value="calm-down">Calm Down</option>
+            <option value="energize">Get Energized</option>
+            <option value="brainstorm">Brainstorm</option>
+            <option value="safe-drive">Drive Safely</option>
+          </select>
 
           <select id="modeInput">
             <option value="">Choose a mode</option>
@@ -161,6 +181,18 @@
 
           <div id="outputBox" class="neutral">
             <p id="output">Ready to create your next session.</p>
+          </div>
+
+          <div id="recommendationPanel" class="recommendation-panel">
+            <div class="recommendation-header">
+              <span class="recommendation-label">Why this recommendation</span>
+            </div>
+            <p id="recommendationWhy">Complete a session profile to see recommendation logic.</p>
+
+            <div class="feedback-buttons">
+              <button id="thumbsUpButton" type="button">👍 Good Match</button>
+              <button id="thumbsDownButton" type="button">👎 Bad Match</button>
+            </div>
           </div>
         </div>
 
@@ -255,7 +287,7 @@
         </div>
 
         <div class="search-bar">
-          <input type="text" id="searchInput" placeholder="Search by name, mood, mode, or category" />
+          <input type="text" id="searchInput" placeholder="Search by name, mood, mode, category, context, or goal" />
         </div>
 
         <div class="filter-bar">

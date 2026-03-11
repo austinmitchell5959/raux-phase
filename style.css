@@ -453,14 +453,16 @@ button {
 }
 
 .action-buttons,
-.timer-buttons {
+.timer-buttons,
+.feedback-buttons {
   display: flex;
   gap: 10px;
   margin-top: 16px;
 }
 
 #startButton,
-#timerStartButton {
+#timerStartButton,
+#thumbsUpButton {
   flex: 1;
   background: linear-gradient(135deg, var(--purple), var(--purple-2));
 }
@@ -474,6 +476,11 @@ button {
 #timerPauseButton {
   flex: 1;
   background: #0f766e;
+}
+
+#thumbsDownButton {
+  flex: 1;
+  background: #7c2d12;
 }
 
 .feedback-message {
@@ -493,6 +500,26 @@ button {
 #output {
   margin: 0;
   line-height: 1.7;
+}
+
+.recommendation-panel {
+  margin-top: 18px;
+  padding: 16px;
+  border-radius: 16px;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+}
+
+.recommendation-label {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+
+.recommendation-panel p {
+  margin: 0;
+  line-height: 1.6;
 }
 
 .neutral {
@@ -676,6 +703,16 @@ button {
   color: #fde68a;
 }
 
+.info-badge.good {
+  background: rgba(34, 197, 94, 0.16);
+  color: #bbf7d0;
+}
+
+.info-badge.bad {
+  background: rgba(220, 38, 38, 0.18);
+  color: #fecaca;
+}
+
 .history-card-actions {
   display: flex;
   gap: 8px;
@@ -750,7 +787,8 @@ body.drive-mode button {
 
 body.drive-mode .mood-buttons,
 body.drive-mode .action-buttons,
-body.drive-mode .timer-buttons {
+body.drive-mode .timer-buttons,
+body.drive-mode .feedback-buttons {
   grid-template-columns: 1fr;
   display: flex;
   flex-direction: column;
@@ -793,7 +831,8 @@ body.drive-mode .timer-display {
   .history-card-actions,
   .topbar-badges,
   .preset-grid,
-  .timer-buttons {
+  .timer-buttons,
+  .feedback-buttons {
     display: flex;
     flex-direction: column;
   }
