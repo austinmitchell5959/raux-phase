@@ -192,10 +192,23 @@ body.drive-mode {
   font-size: 14px;
 }
 
+.preferences-grid,
 .preset-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 10px;
+}
+
+.preferences-actions {
+  margin-top: 12px;
+}
+
+#savePreferencesButton {
+  background: #0f766e;
+}
+
+.preset-grid {
+  grid-template-columns: repeat(4, 1fr);
 }
 
 .preset-button {
@@ -502,7 +515,8 @@ button {
   line-height: 1.7;
 }
 
-.recommendation-panel {
+.recommendation-panel,
+.comparison-panel {
   margin-top: 18px;
   padding: 16px;
   border-radius: 16px;
@@ -519,6 +533,38 @@ button {
 
 .recommendation-panel p {
   margin: 0;
+  line-height: 1.6;
+}
+
+.comparison-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.comparison-card {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 12px;
+}
+
+.comparison-label {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  margin-bottom: 6px;
+}
+
+.comparison-value {
+  display: block;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.score-breakdown {
+  color: var(--muted);
   line-height: 1.6;
 }
 
@@ -761,7 +807,8 @@ body.drive-mode .section-helper,
 body.drive-mode .stats-grid,
 body.drive-mode .history-controls,
 body.drive-mode .search-bar,
-body.drive-mode .filter-bar {
+body.drive-mode .filter-bar,
+body.drive-mode .preferences-panel {
   display: none;
 }
 
@@ -807,8 +854,13 @@ body.drive-mode .timer-display {
     grid-template-columns: 1fr;
   }
 
-  .preset-grid {
+  .preset-grid,
+  .preferences-grid {
     grid-template-columns: 1fr 1fr;
+  }
+
+  .comparison-grid {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -831,6 +883,7 @@ body.drive-mode .timer-display {
   .history-card-actions,
   .topbar-badges,
   .preset-grid,
+  .preferences-grid,
   .timer-buttons,
   .feedback-buttons {
     display: flex;

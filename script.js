@@ -4,6 +4,12 @@ const goalInput = document.getElementById("goalInput");
 const modeInput = document.getElementById("modeInput");
 const categoryInput = document.getElementById("categoryInput");
 const notesInput = document.getElementById("notesInput");
+
+const preferenceOne = document.getElementById("preferenceOne");
+const preferenceTwo = document.getElementById("preferenceTwo");
+const preferenceThree = document.getElementById("preferenceThree");
+const savePreferencesButton = document.getElementById("savePreferencesButton");
+
 const moodButtons = document.querySelectorAll(".mood-button");
 const presetButtons = document.querySelectorAll(".preset-button");
 const startButton = document.getElementById("startButton");
@@ -26,6 +32,11 @@ const undoDeleteButton = document.getElementById("undoDeleteButton");
 const recommendationWhy = document.getElementById("recommendationWhy");
 const thumbsUpButton = document.getElementById("thumbsUpButton");
 const thumbsDownButton = document.getElementById("thumbsDownButton");
+
+const primaryRecommendation = document.getElementById("primaryRecommendation");
+const backupRecommendation = document.getElementById("backupRecommendation");
+const confidenceLevel = document.getElementById("confidenceLevel");
+const scoreBreakdown = document.getElementById("scoreBreakdown");
 
 const timerDisplay = document.getElementById("timerDisplay");
 const timerStartButton = document.getElementById("timerStartButton");
@@ -65,6 +76,11 @@ let musicConnections = JSON.parse(localStorage.getItem("rauxMusicConnections")) 
   soundcloud: false
 };
 let driveMode = JSON.parse(localStorage.getItem("rauxDriveMode")) || false;
+let userPreferences = JSON.parse(localStorage.getItem("rauxUserPreferences")) || [
+  "Spotify",
+  "Apple Music",
+  "SoundCloud"
+];
 
 let timerSeconds = 0;
 let timerInterval = null;
@@ -90,6 +106,16 @@ function saveMusicConnections() {
 
 function saveDriveMode() {
   localStorage.setItem("rauxDriveMode", JSON.stringify(driveMode));
+}
+
+function savePreferences() {
+  localStorage.setItem("rauxUserPreferences", JSON.stringify(userPreferences));
+}
+
+function loadPreferencesIntoInputs() {
+  preferenceOne.value = userPreferences[0] || "";
+  preferenceTwo.value = userPreferences[1] || "";
+  preferenceThree.value = userPreferences[2] || "";
 }
 
 function getTimestamp() {
@@ -138,25 +164,19 @@ function getMemoryBias(service, context, goal, mood, category) {
   return bias;
 }
 
-function getBaseRecommendation(context, goal, category, mood) {
-  if (context === "driving" || goal === "safe-drive") return "Spotify";
-  if (context === "working" || context === "studying" || goal === "focus" || category === "focus" || mood === "focused") return "Spotify";
-  if (goal === "discover" || goal === "brainstorm" || category === "creative" || mood === "creative") return "SoundCloud";
-  if (context === "relaxing" || context === "late-night" || goal === "calm-down" || category === "recovery" || mood === "calm") return "Apple Music";
-  if (context === "gym" || goal === "energize" || category === "energy" || mood === "hype") return "SoundCloud";
-  return "Spotify";
+function getPreferenceBias(service) {
+  if (userPreferences[0] === service) return 10;
+  if (userPreferences[1] === service) return 6;
+  if (userPreferences[2] === service) return 2;
+  return 0;
 }
 
-function getRecommendedSource(context, goal, category, mood) {
-  const services = ["Spotify", "Apple Music", "SoundCloud"];
+function scoreServices(context, goal, category, mood) {
   const scores = {
     "Spotify": 50,
     "Apple Music": 50,
     "SoundCloud": 50
   };
-
-  const base = getBaseRecommendation(context, goal, category, mood);
-  scores[base] += 18;
 
   if (context === "driving") scores["Spotify"] += 12;
   if (context === "working" || context === "studying") scores["Spotify"] += 10;
@@ -179,68 +199,73 @@ function getRecommendedSource(context, goal, category, mood) {
   if (mood === "calm") scores["Apple Music"] += 8;
   if (mood === "hype") scores["SoundCloud"] += 8;
 
-  services.forEach(function (service) {
+  ["Spotify", "Apple Music", "SoundCloud"].forEach(function (service) {
     scores[service] += getMemoryBias(service, context, goal, mood, category);
+    scores[service] += getPreferenceBias(service);
   });
 
   if (musicConnections.spotify) scores["Spotify"] += 6;
   if (musicConnections.appleMusic) scores["Apple Music"] += 6;
   if (musicConnections.soundcloud) scores["SoundCloud"] += 6;
 
-  let winner = "Spotify";
-  let max = -Infinity;
-
-  services.forEach(function (service) {
-    if (scores[service] > max) {
-      max = scores[service];
-      winner = service;
-    }
-  });
-
-  return { winner, scores };
+  return scores;
 }
 
-function buildRecommendationWhy(context, goal, category, mood, recommended, scores) {
+function getRecommendationBundle(context, goal, category, mood) {
+  const scores = scoreServices(context, goal, category, mood);
+
+  const sorted = Object.entries(scores).sort(function (a, b) {
+    return b[1] - a[1];
+  });
+
+  const primary = sorted[0][0];
+  const backup = sorted[1][0];
+  const gap = sorted[0][1] - sorted[1][1];
+
+  let confidence = "Low";
+  if (gap >= 15) confidence = "High";
+  else if (gap >= 7) confidence = "Medium";
+
+  return {
+    primary,
+    backup,
+    confidence,
+    scores
+  };
+}
+
+function buildRecommendationWhy(context, goal, category, mood, primary, backup, confidence) {
   const reasons = [];
 
-  reasons.push(`Recommended ${recommended} based on your current session profile.`);
+  reasons.push(`${primary} was selected as the best match for this session.`);
+  if (context) reasons.push(`Context: ${context}.`);
+  if (goal) reasons.push(`Goal: ${goal}.`);
+  if (category) reasons.push(`Category: ${category}.`);
+  if (mood) reasons.push(`Mood: ${mood}.`);
+  reasons.push(`Backup option: ${backup}.`);
+  reasons.push(`Confidence: ${confidence}.`);
 
-  if (context) reasons.push(`Context selected: ${context}.`);
-  if (goal) reasons.push(`Goal selected: ${goal}.`);
-  if (category) reasons.push(`Category selected: ${category}.`);
-  if (mood) reasons.push(`Mood selected: ${mood}.`);
-
-  if (recommended === "Spotify" && musicConnections.spotify) {
-    reasons.push("Spotify is currently connected, which increased recommendation confidence.");
-  }
-
-  if (recommended === "Apple Music" && musicConnections.appleMusic) {
-    reasons.push("Apple Music is currently connected, which increased recommendation confidence.");
-  }
-
-  if (recommended === "SoundCloud" && musicConnections.soundcloud) {
-    reasons.push("SoundCloud is currently connected, which increased recommendation confidence.");
-  }
-
-  const bestScore = scores[recommended];
-  if (bestScore >= 85) {
-    reasons.push("Confidence: High.");
-  } else if (bestScore >= 70) {
-    reasons.push("Confidence: Medium.");
-  } else {
-    reasons.push("Confidence: Early-stage.");
+  if (userPreferences[0]) {
+    reasons.push(`Preference priority influenced scoring toward ${userPreferences[0]}.`);
   }
 
   return reasons.join(" ");
 }
 
-function getSessionScore(mode, category, mood, recommended, context, goal) {
+function buildScoreBreakdown(scores) {
+  return `Spotify: ${scores["Spotify"]} | Apple Music: ${scores["Apple Music"]} | SoundCloud: ${scores["SoundCloud"]}`;
+}
+
+function getSessionScore(mode, category, mood, primary, context, goal, confidence) {
   let score = 45;
 
   if (mode && category && mood && context && goal) score += 20;
-  if (recommended === "Spotify" && musicConnections.spotify) score += 10;
-  if (recommended === "Apple Music" && musicConnections.appleMusic) score += 10;
-  if (recommended === "SoundCloud" && musicConnections.soundcloud) score += 10;
+  if (primary === "Spotify" && musicConnections.spotify) score += 10;
+  if (primary === "Apple Music" && musicConnections.appleMusic) score += 10;
+  if (primary === "SoundCloud" && musicConnections.soundcloud) score += 10;
+
+  if (confidence === "High") score += 8;
+  if (confidence === "Medium") score += 4;
 
   if (category === "focus" && mood === "focused") score += 8;
   if (category === "creative" && mood === "creative") score += 8;
@@ -309,22 +334,27 @@ function applyPreset(presetName) {
     setSelectedMood("hype");
   }
 
-  const recommendation = getRecommendedSource(
+  const bundle = getRecommendationBundle(
     contextInput.value,
     goalInput.value,
     categoryInput.value,
     selectedMood
   );
 
-  recommendedSource.textContent = recommendation.winner;
+  primaryRecommendation.textContent = bundle.primary;
+  backupRecommendation.textContent = bundle.backup;
+  confidenceLevel.textContent = bundle.confidence;
+  recommendedSource.textContent = bundle.primary;
   recommendationWhy.textContent = buildRecommendationWhy(
     contextInput.value,
     goalInput.value,
     categoryInput.value,
     selectedMood,
-    recommendation.winner,
-    recommendation.scores
+    bundle.primary,
+    bundle.backup,
+    bundle.confidence
   );
+  scoreBreakdown.textContent = buildScoreBreakdown(bundle.scores);
   sessionState.textContent = "Preset Loaded";
   setFeedback("Preset applied.");
 }
@@ -439,6 +469,10 @@ function updateRoutePanelFromLatest() {
     lastMood.textContent = "-";
     sessionScore.textContent = "-";
     recommendedSource.textContent = "-";
+    primaryRecommendation.textContent = "-";
+    backupRecommendation.textContent = "-";
+    confidenceLevel.textContent = "-";
+    scoreBreakdown.textContent = "Compare services after filling out the session profile.";
     return;
   }
 
@@ -448,6 +482,10 @@ function updateRoutePanelFromLatest() {
   lastMood.textContent = latest.mood;
   sessionScore.textContent = latest.score;
   recommendedSource.textContent = latest.recommendedSource;
+  primaryRecommendation.textContent = latest.recommendedSource;
+  backupRecommendation.textContent = latest.backupRecommendation;
+  confidenceLevel.textContent = latest.confidence;
+  scoreBreakdown.textContent = latest.scoreBreakdown;
 }
 
 function renderHistory() {
@@ -535,10 +573,13 @@ function renderHistory() {
           <span class="info-badge">${session.rauxType}</span>
           <span class="info-badge">SCORE ${session.score}</span>
           <span class="info-badge">${session.recommendedSource}</span>
+          <span class="info-badge">BACKUP ${session.backupRecommendation}</span>
+          <span class="info-badge">${session.confidence}</span>
           <span class="info-badge">${session.duration}</span>
         </div>
         ${session.notes ? `Notes: ${session.notes}<br>` : ""}
         Why: ${session.whyRecommendation}<br>
+        Compare: ${session.scoreBreakdown}<br>
         Spotify: ${session.spotifyConnected ? "Yes" : "No"}<br>
         Apple Music: ${session.appleMusicConnected ? "Yes" : "No"}<br>
         SoundCloud: ${session.soundcloudConnected ? "Yes" : "No"}<br>
@@ -689,6 +730,16 @@ presetButtons.forEach(function (button) {
   });
 });
 
+savePreferencesButton.addEventListener("click", function () {
+  userPreferences = [
+    preferenceOne.value || "Spotify",
+    preferenceTwo.value || "Apple Music",
+    preferenceThree.value || "SoundCloud"
+  ];
+  savePreferences();
+  setFeedback("Preferences saved.");
+});
+
 spotifyButton.addEventListener("click", function () {
   musicConnections.spotify = !musicConnections.spotify;
   saveMusicConnections();
@@ -747,15 +798,36 @@ startButton.addEventListener("click", function () {
   }
 
   const rauxType = getRauxType(selectedMood);
-  const recommendation = getRecommendedSource(context, goal, category, selectedMood);
-  const recommended = recommendation.winner;
-  const whyText = buildRecommendationWhy(context, goal, category, selectedMood, recommended, recommendation.scores);
-  const score = getSessionScore(mode, category, selectedMood, recommended, context, goal);
+  const bundle = getRecommendationBundle(context, goal, category, selectedMood);
+  const whyText = buildRecommendationWhy(
+    context,
+    goal,
+    category,
+    selectedMood,
+    bundle.primary,
+    bundle.backup,
+    bundle.confidence
+  );
+  const comparisonText = buildScoreBreakdown(bundle.scores);
+  const score = getSessionScore(
+    mode,
+    category,
+    selectedMood,
+    bundle.primary,
+    context,
+    goal,
+    bundle.confidence
+  );
   const boxClass = getBoxClass(rauxType);
   const timestamp = getTimestamp();
   const duration = formatTime(timerSeconds);
 
-  recommendedSource.textContent = recommended;
+  primaryRecommendation.textContent = bundle.primary;
+  backupRecommendation.textContent = bundle.backup;
+  confidenceLevel.textContent = bundle.confidence;
+  scoreBreakdown.textContent = comparisonText;
+
+  recommendedSource.textContent = bundle.primary;
   sessionScore.textContent = score;
   recommendationWhy.textContent = whyText;
 
@@ -767,7 +839,9 @@ startButton.addEventListener("click", function () {
     Category: ${category}<br>
     Mood: ${selectedMood}<br>
     Suggested Raux Type: ${rauxType}<br>
-    Recommended Source: ${recommended}<br>
+    Primary Recommendation: ${bundle.primary}<br>
+    Backup Recommendation: ${bundle.backup}<br>
+    Confidence: ${bundle.confidence}<br>
     Session Score: ${score}<br>
     Duration: ${duration}<br>
     ${notes ? `Notes: ${notes}<br>` : ""}
@@ -791,8 +865,11 @@ startButton.addEventListener("click", function () {
     mood: selectedMood,
     notes,
     rauxType,
-    recommendedSource: recommended,
+    recommendedSource: bundle.primary,
+    backupRecommendation: bundle.backup,
+    confidence: bundle.confidence,
     whyRecommendation: whyText,
+    scoreBreakdown: comparisonText,
     score,
     duration,
     spotifyConnected: musicConnections.spotify,
@@ -825,6 +902,10 @@ resetButton.addEventListener("click", function () {
 
   output.textContent = "Ready to create your next session.";
   recommendationWhy.textContent = "Complete a session profile to see recommendation logic.";
+  primaryRecommendation.textContent = "-";
+  backupRecommendation.textContent = "-";
+  confidenceLevel.textContent = "-";
+  scoreBreakdown.textContent = "Compare services after filling out the session profile.";
   clearBoxClasses();
   outputBox.classList.add("neutral");
   sessionState.textContent = "Idle";
@@ -882,6 +963,7 @@ searchInput.addEventListener("input", renderHistory);
 updateMusicUI();
 updateDriveModeUI();
 updateTimerDisplay();
+loadPreferencesIntoInputs();
 renderHistory();
 updateStats();
 updateRoutePanelFromLatest();

@@ -27,7 +27,7 @@
         <div class="hero-left">
           <h2>Session Routing Dashboard</h2>
           <p class="hero-text">
-            Create sessions, test music-service states, and review your history from a single control surface.
+            Create sessions, compare recommendation paths, and track how the engine adapts to your preferences.
           </p>
         </div>
 
@@ -36,6 +36,43 @@
             <span class="mini-stat-label">Connected Services</span>
             <span class="mini-stat-value" id="connectedServicesCount">0 / 3</span>
           </div>
+        </div>
+      </section>
+
+      <section class="panel preferences-panel">
+        <div class="section-header">
+          <div>
+            <p class="section-kicker">PREFERENCES</p>
+            <h2>Recommendation Settings</h2>
+            <p class="section-helper">Guide the engine by ranking your preferred services.</p>
+          </div>
+        </div>
+
+        <div class="preferences-grid">
+          <select id="preferenceOne">
+            <option value="">Preferred service #1</option>
+            <option value="Spotify">Spotify</option>
+            <option value="Apple Music">Apple Music</option>
+            <option value="SoundCloud">SoundCloud</option>
+          </select>
+
+          <select id="preferenceTwo">
+            <option value="">Preferred service #2</option>
+            <option value="Spotify">Spotify</option>
+            <option value="Apple Music">Apple Music</option>
+            <option value="SoundCloud">SoundCloud</option>
+          </select>
+
+          <select id="preferenceThree">
+            <option value="">Preferred service #3</option>
+            <option value="Spotify">Spotify</option>
+            <option value="Apple Music">Apple Music</option>
+            <option value="SoundCloud">SoundCloud</option>
+          </select>
+        </div>
+
+        <div class="preferences-actions">
+          <button id="savePreferencesButton" type="button">Save Preferences</button>
         </div>
       </section>
 
@@ -197,6 +234,34 @@
         </div>
 
         <div class="side-stack">
+          <div class="panel comparison-panel">
+            <div class="section-header">
+              <div>
+                <p class="section-kicker">COMPARE</p>
+                <h2>Recommendation Engine</h2>
+              </div>
+            </div>
+
+            <div class="comparison-grid">
+              <div class="comparison-card primary">
+                <span class="comparison-label">Primary</span>
+                <span class="comparison-value" id="primaryRecommendation">-</span>
+              </div>
+              <div class="comparison-card backup">
+                <span class="comparison-label">Backup</span>
+                <span class="comparison-value" id="backupRecommendation">-</span>
+              </div>
+              <div class="comparison-card confidence">
+                <span class="comparison-label">Confidence</span>
+                <span class="comparison-value" id="confidenceLevel">-</span>
+              </div>
+            </div>
+
+            <div class="score-breakdown" id="scoreBreakdown">
+              Compare services after filling out the session profile.
+            </div>
+          </div>
+
           <div class="panel timer-panel">
             <div class="section-header">
               <div>
