@@ -13,6 +13,7 @@
         <div class="brand-block">
           <p class="eyebrow">RAUX SYSTEM</p>
           <h1>Raux Phase 2</h1>
+          <p class="hero-subtitle">Create, route, and track sessions from one dashboard.</p>
         </div>
 
         <div class="topbar-badges">
@@ -25,7 +26,7 @@
         <div class="hero-left">
           <h2>Session Routing Dashboard</h2>
           <p class="hero-text">
-            Create sessions, track history, and prototype music-source connections in one control center.
+            Create sessions, test music-service states, and review your history from a single control surface.
           </p>
         </div>
 
@@ -37,11 +38,29 @@
         </div>
       </section>
 
+      <section class="panel presets-panel">
+        <div class="section-header">
+          <div>
+            <p class="section-kicker">PRESETS</p>
+            <h2>Quick Start Templates</h2>
+            <p class="section-helper">One-click session setups to make the app feel faster and smarter.</p>
+          </div>
+        </div>
+
+        <div class="preset-grid">
+          <button class="preset-button" data-preset="deep-focus" type="button">Deep Focus</button>
+          <button class="preset-button" data-preset="creative-sprint" type="button">Creative Sprint</button>
+          <button class="preset-button" data-preset="recovery-reset" type="button">Recovery Reset</button>
+          <button class="preset-button" data-preset="energy-lift" type="button">Energy Lift</button>
+        </div>
+      </section>
+
       <section class="panel music-panel">
         <div class="section-header">
           <div>
             <p class="section-kicker">CONNECTIONS</p>
             <h2>Music Services</h2>
+            <p class="section-helper">Prototype connection states for routing and session context.</p>
           </div>
           <span class="status-pill subtle">Prototype Safe Mode</span>
         </div>
@@ -82,15 +101,15 @@
         <div class="service-status-grid">
           <div class="service-status-card">
             <span class="service-status-label">Spotify</span>
-            <p id="spotifyStatus" class="service-status">Not connected — prototype only.</p>
+            <p id="spotifyStatus" class="service-status">Not connected — prototype mode only.</p>
           </div>
           <div class="service-status-card">
             <span class="service-status-label">Apple Music</span>
-            <p id="appleMusicStatus" class="service-status">Not connected — prototype only.</p>
+            <p id="appleMusicStatus" class="service-status">Not connected — prototype mode only.</p>
           </div>
           <div class="service-status-card">
             <span class="service-status-label">SoundCloud</span>
-            <p id="soundcloudStatus" class="service-status">Not connected — prototype only.</p>
+            <p id="soundcloudStatus" class="service-status">Not connected — prototype mode only.</p>
           </div>
         </div>
       </section>
@@ -100,28 +119,29 @@
           <div class="section-header">
             <div>
               <p class="section-kicker">CREATE</p>
-              <h2>Build Session</h2>
+              <h2>Create a New Session</h2>
+              <p class="section-helper">Set the mode, category, and mood to generate a smarter session profile.</p>
             </div>
           </div>
 
-          <input type="text" id="sessionInput" placeholder="Enter session name" />
+          <input type="text" id="sessionInput" placeholder="Name this session" />
 
           <select id="modeInput">
-            <option value="">Select mode</option>
+            <option value="">Choose a mode</option>
             <option value="prototype">Prototype</option>
             <option value="build">Build</option>
             <option value="test">Test</option>
           </select>
 
           <select id="categoryInput">
-            <option value="">Select category</option>
+            <option value="">Choose a category</option>
             <option value="focus">Focus</option>
             <option value="creative">Creative</option>
             <option value="recovery">Recovery</option>
             <option value="energy">Energy</option>
           </select>
 
-          <p class="label">Choose mood</p>
+          <p class="label">Select a mood</p>
           <div class="mood-buttons">
             <button class="mood-button" data-mood="focused" type="button">Focused</button>
             <button class="mood-button" data-mood="creative" type="button">Creative</button>
@@ -134,8 +154,10 @@
             <button id="resetButton" type="button">Reset</button>
           </div>
 
+          <p id="feedbackMessage" class="feedback-message"></p>
+
           <div id="outputBox" class="neutral">
-            <p id="output">Waiting for input...</p>
+            <p id="output">Ready to create your next session.</p>
           </div>
         </div>
 
@@ -154,8 +176,16 @@
                 <span class="route-value" id="primarySource">None</span>
               </div>
               <div class="route-item">
+                <span class="route-label">Recommended Source</span>
+                <span class="route-value" id="recommendedSource">-</span>
+              </div>
+              <div class="route-item">
                 <span class="route-label">Session State</span>
                 <span class="route-value" id="sessionState">Idle</span>
+              </div>
+              <div class="route-item">
+                <span class="route-label">Session Score</span>
+                <span class="route-value" id="sessionScore">-</span>
               </div>
               <div class="route-item">
                 <span class="route-label">Last Category</span>
@@ -194,16 +224,18 @@
           <div>
             <p class="section-kicker">ARCHIVE</p>
             <h2>Session History</h2>
+            <p class="section-helper">Your saved sessions will appear here once you create one.</p>
           </div>
 
           <div class="history-controls">
-            <button id="exportButton" type="button">Export</button>
+            <button id="favoritesOnlyButton" type="button">Favorites Only: Off</button>
+            <button id="exportButton" type="button">Export History</button>
             <button id="clearHistoryButton" type="button">Clear History</button>
           </div>
         </div>
 
         <div class="search-bar">
-          <input type="text" id="searchInput" placeholder="Search session history" />
+          <input type="text" id="searchInput" placeholder="Search by name, mood, mode, or category" />
         </div>
 
         <div class="filter-bar">
@@ -231,8 +263,13 @@
           </select>
         </div>
 
+        <div id="undoBanner" class="undo-banner hidden">
+          <span>Session deleted.</span>
+          <button id="undoDeleteButton" type="button">Undo</button>
+        </div>
+
         <div id="historyList">
-          <p class="empty-history">No sessions yet.</p>
+          <p class="empty-history">No sessions have been logged yet.</p>
         </div>
       </section>
     </div>

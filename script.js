@@ -2,10 +2,12 @@ const sessionInput = document.getElementById("sessionInput");
 const modeInput = document.getElementById("modeInput");
 const categoryInput = document.getElementById("categoryInput");
 const moodButtons = document.querySelectorAll(".mood-button");
+const presetButtons = document.querySelectorAll(".preset-button");
 const startButton = document.getElementById("startButton");
 const resetButton = document.getElementById("resetButton");
 const clearHistoryButton = document.getElementById("clearHistoryButton");
 const exportButton = document.getElementById("exportButton");
+const favoritesOnlyButton = document.getElementById("favoritesOnlyButton");
 const filterMood = document.getElementById("filterMood");
 const filterMode = document.getElementById("filterMode");
 const filterCategory = document.getElementById("filterCategory");
@@ -13,6 +15,9 @@ const searchInput = document.getElementById("searchInput");
 const output = document.getElementById("output");
 const outputBox = document.getElementById("outputBox");
 const historyList = document.getElementById("historyList");
+const feedbackMessage = document.getElementById("feedbackMessage");
+const undoBanner = document.getElementById("undoBanner");
+const undoDeleteButton = document.getElementById("undoDeleteButton");
 
 const spotifyButton = document.getElementById("spotifyButton");
 const appleMusicButton = document.getElementById("appleMusicButton");
@@ -29,17 +34,55 @@ const topCategory = document.getElementById("topCategory");
 
 const connectedServicesCount = document.getElementById("connectedServicesCount");
 const primarySource = document.getElementById("primarySource");
+const recommendedSource = document.getElementById("recommendedSource");
 const sessionState = document.getElementById("sessionState");
+const sessionScore = document.getElementById("sessionScore");
 const lastCategory = document.getElementById("lastCategory");
 const lastMood = document.getElementById("lastMood");
 
 let selectedMood = "";
+let favoritesOnly = false;
 let sessionHistory = JSON.parse(localStorage.getItem("rauxSessionHistory")) || [];
 let musicConnections = JSON.parse(localStorage.getItem("rauxMusicConnections")) || {
   spotify: false,
   appleMusic: false,
   soundcloud: false
 };
+let lastDeletedSession = null;
+
+function setFeedback(message) {
+  feedbackMessage.textContent = message;
+  if (message) {
+    setTimeout(function () {
+      if (feedbackMessage.textContent === message) {
+        feedbackMessage.textContent = "";
+      }
+    }, 1800);
+  }
+}
+
+function saveHistory() {
+  localStorage.setItem("rauxSessionHistory", JSON.stringify(sessionHistory));
+}
+
+function saveMusicConnections() {
+  localStorage.setItem("rauxMusicConnections", JSON.stringify(musicConnections));
+}
+
+function getTimestamp() {
+  return new Date().toLocaleString();
+}
+
+function getConnectedCount() {
+  return Object.values(musicConnections).filter(Boolean).length;
+}
+
+function getPrimarySource() {
+  if (musicConnections.spotify) return "Spotify";
+  if (musicConnections.appleMusic) return "Apple Music";
+  if (musicConnections.soundcloud) return "SoundCloud";
+  return "None";
+}
 
 function getRauxType(mood) {
   const lowerMood = mood.toLowerCase();
@@ -49,6 +92,39 @@ function getRauxType(mood) {
   if (lowerMood === "calm") return "Soft Session";
   if (lowerMood === "hype") return "Energy Boost";
   return "Custom Session";
+}
+
+function getRecommendedSource(category, mood) {
+  if (category === "focus" || mood === "focused") {
+    return "Spotify";
+  }
+  if (category === "creative" || mood === "creative") {
+    return "SoundCloud";
+  }
+  if (category === "recovery" || mood === "calm") {
+    return "Apple Music";
+  }
+  if (category === "energy" || mood === "hype") {
+    return musicConnections.soundcloud ? "SoundCloud" : "Spotify";
+  }
+  return "Spotify";
+}
+
+function getSessionScore(mode, category, mood, recommended) {
+  let score = 55;
+
+  if (mode && category && mood) score += 15;
+
+  if (recommended === "Spotify" && musicConnections.spotify) score += 10;
+  if (recommended === "Apple Music" && musicConnections.appleMusic) score += 10;
+  if (recommended === "SoundCloud" && musicConnections.soundcloud) score += 10;
+
+  if (category === "focus" && mood === "focused") score += 10;
+  if (category === "creative" && mood === "creative") score += 10;
+  if (category === "recovery" && mood === "calm") score += 10;
+  if (category === "energy" && mood === "hype") score += 10;
+
+  return Math.min(score, 100);
 }
 
 function getBoxClass(rauxType) {
@@ -63,27 +139,40 @@ function clearBoxClasses() {
   outputBox.className = "";
 }
 
-function getTimestamp() {
-  return new Date().toLocaleString();
+function setSelectedMood(mood) {
+  selectedMood = mood;
+  moodButtons.forEach(function (button) {
+    button.classList.toggle("active", button.dataset.mood === mood);
+  });
 }
 
-function saveHistory() {
-  localStorage.setItem("rauxSessionHistory", JSON.stringify(sessionHistory));
-}
+function applyPreset(presetName) {
+  if (presetName === "deep-focus") {
+    sessionInput.value = "Deep Focus Session";
+    modeInput.value = "build";
+    categoryInput.value = "focus";
+    setSelectedMood("focused");
+  } else if (presetName === "creative-sprint") {
+    sessionInput.value = "Creative Sprint";
+    modeInput.value = "prototype";
+    categoryInput.value = "creative";
+    setSelectedMood("creative");
+  } else if (presetName === "recovery-reset") {
+    sessionInput.value = "Recovery Reset";
+    modeInput.value = "test";
+    categoryInput.value = "recovery";
+    setSelectedMood("calm");
+  } else if (presetName === "energy-lift") {
+    sessionInput.value = "Energy Lift";
+    modeInput.value = "build";
+    categoryInput.value = "energy";
+    setSelectedMood("hype");
+  }
 
-function saveMusicConnections() {
-  localStorage.setItem("rauxMusicConnections", JSON.stringify(musicConnections));
-}
-
-function getConnectedCount() {
-  return Object.values(musicConnections).filter(Boolean).length;
-}
-
-function getPrimarySource() {
-  if (musicConnections.spotify) return "Spotify";
-  if (musicConnections.appleMusic) return "Apple Music";
-  if (musicConnections.soundcloud) return "SoundCloud";
-  return "None";
+  const recommended = getRecommendedSource(categoryInput.value, selectedMood);
+  recommendedSource.textContent = recommended;
+  sessionState.textContent = "Preset Loaded";
+  setFeedback("Preset applied.");
 }
 
 function updateMusicUI() {
@@ -125,7 +214,7 @@ function getTopValue(key) {
   if (sessionHistory.length === 0) return "-";
 
   const counts = {};
-  sessionHistory.forEach(function(session) {
+  sessionHistory.forEach(function (session) {
     counts[session[key]] = (counts[session[key]] || 0) + 1;
   });
 
@@ -154,6 +243,8 @@ function updateRoutePanelFromLatest() {
     sessionState.textContent = "Idle";
     lastCategory.textContent = "-";
     lastMood.textContent = "-";
+    sessionScore.textContent = "-";
+    recommendedSource.textContent = "-";
     return;
   }
 
@@ -161,6 +252,8 @@ function updateRoutePanelFromLatest() {
   sessionState.textContent = "Session Logged";
   lastCategory.textContent = latest.category;
   lastMood.textContent = latest.mood;
+  sessionScore.textContent = latest.score;
+  recommendedSource.textContent = latest.recommendedSource;
 }
 
 function renderHistory() {
@@ -169,7 +262,11 @@ function renderHistory() {
   const categoryFilterValue = filterCategory.value;
   const searchValue = searchInput.value.trim().toLowerCase();
 
-  let filteredHistory = sessionHistory.slice().reverse();
+  let filteredHistory = sessionHistory.slice();
+
+  if (favoritesOnly) {
+    filteredHistory = filteredHistory.filter(session => session.favorite);
+  }
 
   if (moodFilterValue !== "all") {
     filteredHistory = filteredHistory.filter(session => session.mood === moodFilterValue);
@@ -184,7 +281,7 @@ function renderHistory() {
   }
 
   if (searchValue !== "") {
-    filteredHistory = filteredHistory.filter(function(session) {
+    filteredHistory = filteredHistory.filter(function (session) {
       return (
         session.sessionName.toLowerCase().includes(searchValue) ||
         session.mode.toLowerCase().includes(searchValue) ||
@@ -195,8 +292,14 @@ function renderHistory() {
     });
   }
 
+  filteredHistory.sort(function (a, b) {
+    if (a.favorite && !b.favorite) return -1;
+    if (!a.favorite && b.favorite) return 1;
+    return b.id - a.id;
+  });
+
   if (filteredHistory.length === 0) {
-    historyList.innerHTML = '<p class="empty-history">No matching sessions.</p>';
+    historyList.innerHTML = '<p class="empty-history">No sessions match your current filters.</p>';
     updateStats();
     updateRoutePanelFromLatest();
     return;
@@ -204,9 +307,12 @@ function renderHistory() {
 
   historyList.innerHTML = "";
 
-  filteredHistory.forEach(function(session) {
+  filteredHistory.forEach(function (session) {
     const card = document.createElement("div");
     card.classList.add("history-card");
+    if (session.favorite) {
+      card.classList.add("pinned");
+    }
 
     if (session.isEditing) {
       card.innerHTML = `
@@ -219,16 +325,23 @@ function renderHistory() {
       `;
     } else {
       card.innerHTML = `
-        <strong>${session.sessionName}</strong><br>
-        Mode: ${session.mode}<br>
-        Category: ${session.category}<br>
-        Mood: ${session.mood}<br>
-        Type: ${session.rauxType}<br>
+        <strong>${session.sessionName}</strong>
+        <div class="badge-row">
+          ${session.favorite ? '<span class="info-badge favorite">★ FAVORITE</span>' : ""}
+          <span class="info-badge">${session.mode.toUpperCase()}</span>
+          <span class="info-badge">${session.category.toUpperCase()}</span>
+          <span class="info-badge">${session.mood.toUpperCase()}</span>
+          <span class="info-badge">${session.rauxType}</span>
+          <span class="info-badge">SCORE ${session.score}</span>
+          <span class="info-badge">${session.recommendedSource}</span>
+        </div>
         Spotify: ${session.spotifyConnected ? "Yes" : "No"}<br>
         Apple Music: ${session.appleMusicConnected ? "Yes" : "No"}<br>
         SoundCloud: ${session.soundcloudConnected ? "Yes" : "No"}<br>
         Time: ${session.timestamp}
         <div class="history-card-actions">
+          <button class="favorite-button ${session.favorite ? "" : "off"}" data-id="${session.id}" type="button">${session.favorite ? "Unfavorite" : "Favorite"}</button>
+          <button class="duplicate-button" data-id="${session.id}" type="button">Duplicate</button>
           <button class="edit-button" data-id="${session.id}" type="button">Edit</button>
           <button class="delete-button" data-id="${session.id}" type="button">Delete</button>
         </div>
@@ -244,34 +357,77 @@ function renderHistory() {
 }
 
 function attachCardEvents() {
-  document.querySelectorAll(".delete-button").forEach(function(button) {
-    button.addEventListener("click", function() {
+  document.querySelectorAll(".favorite-button").forEach(function (button) {
+    button.addEventListener("click", function () {
       const id = Number(button.dataset.id);
-      sessionHistory = sessionHistory.filter(session => session.id !== id);
+      sessionHistory = sessionHistory.map(function (session) {
+        if (session.id === id) {
+          session.favorite = !session.favorite;
+        }
+        return session;
+      });
       saveHistory();
       renderHistory();
+      setFeedback("Favorite state updated.");
     });
   });
 
-  document.querySelectorAll(".edit-button").forEach(function(button) {
-    button.addEventListener("click", function() {
+  document.querySelectorAll(".duplicate-button").forEach(function (button) {
+    button.addEventListener("click", function () {
       const id = Number(button.dataset.id);
-      sessionHistory.forEach(function(session) {
+      const original = sessionHistory.find(session => session.id === id);
+      if (!original) return;
+
+      const clone = {
+        ...original,
+        id: Date.now(),
+        sessionName: `${original.sessionName} Copy`,
+        timestamp: getTimestamp(),
+        isEditing: false,
+        favorite: false
+      };
+
+      sessionHistory.push(clone);
+      saveHistory();
+      renderHistory();
+      setFeedback("Session duplicated.");
+    });
+  });
+
+  document.querySelectorAll(".delete-button").forEach(function (button) {
+    button.addEventListener("click", function () {
+      const confirmed = confirm("Delete this session from history?");
+      if (!confirmed) return;
+
+      const id = Number(button.dataset.id);
+      lastDeletedSession = sessionHistory.find(session => session.id === id) || null;
+      sessionHistory = sessionHistory.filter(session => session.id !== id);
+      saveHistory();
+      renderHistory();
+      undoBanner.classList.remove("hidden");
+      setFeedback("Session removed.");
+    });
+  });
+
+  document.querySelectorAll(".edit-button").forEach(function (button) {
+    button.addEventListener("click", function () {
+      const id = Number(button.dataset.id);
+      sessionHistory.forEach(function (session) {
         session.isEditing = session.id === id;
       });
       renderHistory();
     });
   });
 
-  document.querySelectorAll(".save-edit-button").forEach(function(button) {
-    button.addEventListener("click", function() {
+  document.querySelectorAll(".save-edit-button").forEach(function (button) {
+    button.addEventListener("click", function () {
       const id = Number(button.dataset.id);
       const input = document.querySelector(`.edit-input[data-id="${id}"]`);
       const newName = input.value.trim();
 
       if (newName === "") return;
 
-      sessionHistory = sessionHistory.map(function(session) {
+      sessionHistory = sessionHistory.map(function (session) {
         if (session.id === id) {
           session.sessionName = newName;
           session.isEditing = false;
@@ -283,13 +439,14 @@ function attachCardEvents() {
 
       saveHistory();
       renderHistory();
+      setFeedback("Session renamed.");
     });
   });
 
-  document.querySelectorAll(".cancel-edit-button").forEach(function(button) {
-    button.addEventListener("click", function() {
+  document.querySelectorAll(".cancel-edit-button").forEach(function (button) {
+    button.addEventListener("click", function () {
       const id = Number(button.dataset.id);
-      sessionHistory = sessionHistory.map(function(session) {
+      sessionHistory = sessionHistory.map(function (session) {
         if (session.id === id) {
           session.isEditing = false;
         }
@@ -300,48 +457,61 @@ function attachCardEvents() {
   });
 }
 
-moodButtons.forEach(function(button) {
-  button.addEventListener("click", function() {
-    selectedMood = button.dataset.mood;
-    moodButtons.forEach(btn => btn.classList.remove("active"));
-    button.classList.add("active");
+moodButtons.forEach(function (button) {
+  button.addEventListener("click", function () {
+    setSelectedMood(button.dataset.mood);
   });
 });
 
-spotifyButton.addEventListener("click", function() {
+presetButtons.forEach(function (button) {
+  button.addEventListener("click", function () {
+    applyPreset(button.dataset.preset);
+  });
+});
+
+spotifyButton.addEventListener("click", function () {
   musicConnections.spotify = !musicConnections.spotify;
   saveMusicConnections();
   updateMusicUI();
+  setFeedback("Spotify prototype state updated.");
 });
 
-appleMusicButton.addEventListener("click", function() {
+appleMusicButton.addEventListener("click", function () {
   musicConnections.appleMusic = !musicConnections.appleMusic;
   saveMusicConnections();
   updateMusicUI();
+  setFeedback("Apple Music prototype state updated.");
 });
 
-soundcloudButton.addEventListener("click", function() {
+soundcloudButton.addEventListener("click", function () {
   musicConnections.soundcloud = !musicConnections.soundcloud;
   saveMusicConnections();
   updateMusicUI();
+  setFeedback("SoundCloud prototype state updated.");
 });
 
-startButton.addEventListener("click", function() {
+startButton.addEventListener("click", function () {
   const sessionName = sessionInput.value.trim();
   const mode = modeInput.value;
   const category = categoryInput.value;
 
   if (sessionName === "" || mode === "" || category === "" || selectedMood === "") {
-    output.textContent = "Please fill out session name, mode, category, and mood.";
+    output.textContent = "Please complete session name, mode, category, and mood before starting.";
     clearBoxClasses();
     outputBox.classList.add("neutral");
     sessionState.textContent = "Incomplete";
+    setFeedback("");
     return;
   }
 
   const rauxType = getRauxType(selectedMood);
+  const recommended = getRecommendedSource(category, selectedMood);
+  const score = getSessionScore(mode, category, selectedMood, recommended);
   const boxClass = getBoxClass(rauxType);
   const timestamp = getTimestamp();
+
+  recommendedSource.textContent = recommended;
+  sessionScore.textContent = score;
 
   output.innerHTML = `
     Session: ${sessionName}<br>
@@ -349,6 +519,8 @@ startButton.addEventListener("click", function() {
     Category: ${category}<br>
     Mood: ${selectedMood}<br>
     Suggested Raux Type: ${rauxType}<br>
+    Recommended Source: ${recommended}<br>
+    Session Score: ${score}<br>
     Spotify: ${musicConnections.spotify ? "Connected (prototype)" : "Not connected"}<br>
     Apple Music: ${musicConnections.appleMusic ? "Connected (prototype)" : "Not connected"}<br>
     SoundCloud: ${musicConnections.soundcloud ? "Connected (prototype)" : "Not connected"}<br>
@@ -366,19 +538,24 @@ startButton.addEventListener("click", function() {
     category,
     mood: selectedMood,
     rauxType,
+    recommendedSource: recommended,
+    score,
     spotifyConnected: musicConnections.spotify,
     appleMusicConnected: musicConnections.appleMusic,
     soundcloudConnected: musicConnections.soundcloud,
     timestamp,
-    isEditing: false
+    isEditing: false,
+    favorite: false
   };
 
   sessionHistory.push(newSession);
   saveHistory();
   renderHistory();
+  undoBanner.classList.add("hidden");
+  setFeedback("Session saved to history.");
 });
 
-resetButton.addEventListener("click", function() {
+resetButton.addEventListener("click", function () {
   sessionInput.value = "";
   modeInput.value = "";
   categoryInput.value = "";
@@ -386,19 +563,43 @@ resetButton.addEventListener("click", function() {
 
   moodButtons.forEach(button => button.classList.remove("active"));
 
-  output.textContent = "Waiting for input...";
+  output.textContent = "Ready to create your next session.";
   clearBoxClasses();
   outputBox.classList.add("neutral");
   sessionState.textContent = "Idle";
+  recommendedSource.textContent = "-";
+  sessionScore.textContent = "-";
+  setFeedback("Session form cleared.");
 });
 
-clearHistoryButton.addEventListener("click", function() {
-  sessionHistory = [];
-  saveHistory();
+favoritesOnlyButton.addEventListener("click", function () {
+  favoritesOnly = !favoritesOnly;
+  favoritesOnlyButton.textContent = `Favorites Only: ${favoritesOnly ? "On" : "Off"}`;
   renderHistory();
 });
 
-exportButton.addEventListener("click", function() {
+undoDeleteButton.addEventListener("click", function () {
+  if (!lastDeletedSession) return;
+  sessionHistory.push(lastDeletedSession);
+  saveHistory();
+  renderHistory();
+  undoBanner.classList.add("hidden");
+  lastDeletedSession = null;
+  setFeedback("Session restored.");
+});
+
+clearHistoryButton.addEventListener("click", function () {
+  const confirmed = confirm("Are you sure you want to clear all session history?");
+  if (!confirmed) return;
+
+  sessionHistory = [];
+  saveHistory();
+  renderHistory();
+  undoBanner.classList.add("hidden");
+  setFeedback("Session history cleared.");
+});
+
+exportButton.addEventListener("click", function () {
   const data = JSON.stringify(sessionHistory, null, 2);
   const blob = new Blob([data], { type: "application/json" });
   const url = URL.createObjectURL(blob);
@@ -409,6 +610,7 @@ exportButton.addEventListener("click", function() {
   link.click();
 
   URL.revokeObjectURL(url);
+  setFeedback("Session history exported successfully.");
 });
 
 filterMood.addEventListener("change", renderHistory);
