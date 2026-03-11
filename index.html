@@ -19,6 +19,7 @@
         <div class="topbar-badges">
           <span class="status-pill live">Live Prototype</span>
           <span class="status-pill secure">Local State Active</span>
+          <button id="driveModeButton" class="drive-mode-button" type="button">Drive Mode: Off</button>
         </div>
       </header>
 
@@ -120,7 +121,7 @@
             <div>
               <p class="section-kicker">CREATE</p>
               <h2>Create a New Session</h2>
-              <p class="section-helper">Set the mode, category, and mood to generate a smarter session profile.</p>
+              <p class="section-helper">Set the mode, category, mood, and notes to generate a smarter session profile.</p>
             </div>
           </div>
 
@@ -140,6 +141,8 @@
             <option value="recovery">Recovery</option>
             <option value="energy">Energy</option>
           </select>
+
+          <textarea id="notesInput" placeholder="What is this session for? (optional)"></textarea>
 
           <p class="label">Select a mood</p>
           <div class="mood-buttons">
@@ -162,6 +165,23 @@
         </div>
 
         <div class="side-stack">
+          <div class="panel timer-panel">
+            <div class="section-header">
+              <div>
+                <p class="section-kicker">TIMER</p>
+                <h2>Session Timer</h2>
+              </div>
+            </div>
+
+            <div class="timer-display" id="timerDisplay">00:00</div>
+
+            <div class="timer-buttons">
+              <button id="timerStartButton" type="button">Start</button>
+              <button id="timerPauseButton" type="button">Pause</button>
+              <button id="timerResetButton" type="button">Reset</button>
+            </div>
+          </div>
+
           <div class="panel route-panel">
             <div class="section-header">
               <div>

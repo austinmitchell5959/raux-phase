@@ -40,6 +40,10 @@ body {
     linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 100%);
 }
 
+body.drive-mode {
+  background: #05070c;
+}
+
 .app-shell {
   width: 100%;
   padding: 22px 12px 40px;
@@ -84,7 +88,8 @@ body {
   flex-wrap: wrap;
 }
 
-.status-pill {
+.status-pill,
+.drive-mode-button {
   display: inline-flex;
   align-items: center;
   padding: 8px 12px;
@@ -92,20 +97,24 @@ body {
   font-size: 12px;
   border: 1px solid var(--border);
   background: rgba(255, 255, 255, 0.05);
+  color: white;
 }
 
 .status-pill.live {
-  color: white;
   background: linear-gradient(135deg, var(--purple), var(--purple-2));
 }
 
 .status-pill.secure {
-  color: white;
   background: linear-gradient(135deg, var(--green), var(--green-2));
 }
 
 .status-pill.subtle {
   color: var(--muted);
+}
+
+.drive-mode-button {
+  background: #374151;
+  cursor: pointer;
 }
 
 .panel {
@@ -393,7 +402,8 @@ button:hover {
 }
 
 input,
-select {
+select,
+textarea {
   width: 100%;
   padding: 12px 14px;
   margin-top: 10px;
@@ -401,9 +411,16 @@ select {
   border: 1px solid var(--border);
   background: rgba(255, 255, 255, 0.04);
   color: var(--text);
+  font-family: Arial, sans-serif;
 }
 
-input::placeholder {
+textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+
+input::placeholder,
+textarea::placeholder {
   color: #91a0be;
 }
 
@@ -435,20 +452,28 @@ button {
   background: linear-gradient(135deg, var(--purple), var(--green));
 }
 
-.action-buttons {
+.action-buttons,
+.timer-buttons {
   display: flex;
   gap: 10px;
   margin-top: 16px;
 }
 
-#startButton {
+#startButton,
+#timerStartButton {
   flex: 1;
   background: linear-gradient(135deg, var(--purple), var(--purple-2));
 }
 
-#resetButton {
+#resetButton,
+#timerResetButton {
   flex: 1;
   background: #374151;
+}
+
+#timerPauseButton {
+  flex: 1;
+  background: #0f766e;
 }
 
 .feedback-message {
@@ -492,6 +517,16 @@ button {
 
 .custom-session {
   background: linear-gradient(135deg, rgba(107, 114, 128, 0.35), rgba(55, 65, 81, 0.35));
+}
+
+.timer-display {
+  font-size: 40px;
+  font-weight: bold;
+  text-align: center;
+  padding: 20px;
+  border-radius: 18px;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
 }
 
 .route-grid {
@@ -680,6 +715,51 @@ button {
   margin: 0;
 }
 
+body.drive-mode .hero,
+body.drive-mode .presets-panel,
+body.drive-mode .music-panel,
+body.drive-mode .history-section .section-helper,
+body.drive-mode .hero-subtitle,
+body.drive-mode .section-helper,
+body.drive-mode .stats-grid,
+body.drive-mode .history-controls,
+body.drive-mode .search-bar,
+body.drive-mode .filter-bar {
+  display: none;
+}
+
+body.drive-mode .dashboard-grid {
+  grid-template-columns: 1fr;
+}
+
+body.drive-mode .panel {
+  padding: 26px;
+}
+
+body.drive-mode .brand-block h1 {
+  font-size: 44px;
+}
+
+body.drive-mode input,
+body.drive-mode select,
+body.drive-mode textarea,
+body.drive-mode button {
+  font-size: 18px;
+  padding: 16px 18px;
+}
+
+body.drive-mode .mood-buttons,
+body.drive-mode .action-buttons,
+body.drive-mode .timer-buttons {
+  grid-template-columns: 1fr;
+  display: flex;
+  flex-direction: column;
+}
+
+body.drive-mode .timer-display {
+  font-size: 56px;
+}
+
 @media (max-width: 900px) {
   .dashboard-grid {
     grid-template-columns: 1fr;
@@ -712,7 +792,8 @@ button {
   .history-controls,
   .history-card-actions,
   .topbar-badges,
-  .preset-grid {
+  .preset-grid,
+  .timer-buttons {
     display: flex;
     flex-direction: column;
   }

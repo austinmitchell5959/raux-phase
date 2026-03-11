@@ -1,6 +1,7 @@
 const sessionInput = document.getElementById("sessionInput");
 const modeInput = document.getElementById("modeInput");
 const categoryInput = document.getElementById("categoryInput");
+const notesInput = document.getElementById("notesInput");
 const moodButtons = document.querySelectorAll(".mood-button");
 const presetButtons = document.querySelectorAll(".preset-button");
 const startButton = document.getElementById("startButton");
@@ -8,6 +9,7 @@ const resetButton = document.getElementById("resetButton");
 const clearHistoryButton = document.getElementById("clearHistoryButton");
 const exportButton = document.getElementById("exportButton");
 const favoritesOnlyButton = document.getElementById("favoritesOnlyButton");
+const driveModeButton = document.getElementById("driveModeButton");
 const filterMood = document.getElementById("filterMood");
 const filterMode = document.getElementById("filterMode");
 const filterCategory = document.getElementById("filterCategory");
@@ -18,6 +20,11 @@ const historyList = document.getElementById("historyList");
 const feedbackMessage = document.getElementById("feedbackMessage");
 const undoBanner = document.getElementById("undoBanner");
 const undoDeleteButton = document.getElementById("undoDeleteButton");
+
+const timerDisplay = document.getElementById("timerDisplay");
+const timerStartButton = document.getElementById("timerStartButton");
+const timerPauseButton = document.getElementById("timerPauseButton");
+const timerResetButton = document.getElementById("timerResetButton");
 
 const spotifyButton = document.getElementById("spotifyButton");
 const appleMusicButton = document.getElementById("appleMusicButton");
@@ -42,13 +49,18 @@ const lastMood = document.getElementById("lastMood");
 
 let selectedMood = "";
 let favoritesOnly = false;
+let lastDeletedSession = null;
+
 let sessionHistory = JSON.parse(localStorage.getItem("rauxSessionHistory")) || [];
 let musicConnections = JSON.parse(localStorage.getItem("rauxMusicConnections")) || {
   spotify: false,
   appleMusic: false,
   soundcloud: false
 };
-let lastDeletedSession = null;
+let driveMode = JSON.parse(localStorage.getItem("rauxDriveMode")) || false;
+
+let timerSeconds = 0;
+let timerInterval = null;
 
 function setFeedback(message) {
   feedbackMessage.textContent = message;
@@ -67,6 +79,10 @@ function saveHistory() {
 
 function saveMusicConnections() {
   localStorage.setItem("rauxMusicConnections", JSON.stringify(musicConnections));
+}
+
+function saveDriveMode() {
+  localStorage.setItem("rauxDriveMode", JSON.stringify(driveMode));
 }
 
 function getTimestamp() {
@@ -95,18 +111,10 @@ function getRauxType(mood) {
 }
 
 function getRecommendedSource(category, mood) {
-  if (category === "focus" || mood === "focused") {
-    return "Spotify";
-  }
-  if (category === "creative" || mood === "creative") {
-    return "SoundCloud";
-  }
-  if (category === "recovery" || mood === "calm") {
-    return "Apple Music";
-  }
-  if (category === "energy" || mood === "hype") {
-    return musicConnections.soundcloud ? "SoundCloud" : "Spotify";
-  }
+  if (category === "focus" || mood === "focused") return "Spotify";
+  if (category === "creative" || mood === "creative") return "SoundCloud";
+  if (category === "recovery" || mood === "calm") return "Apple Music";
+  if (category === "energy" || mood === "hype") return musicConnections.soundcloud ? "SoundCloud" : "Spotify";
   return "Spotify";
 }
 
@@ -114,7 +122,6 @@ function getSessionScore(mode, category, mood, recommended) {
   let score = 55;
 
   if (mode && category && mood) score += 15;
-
   if (recommended === "Spotify" && musicConnections.spotify) score += 10;
   if (recommended === "Apple Music" && musicConnections.appleMusic) score += 10;
   if (recommended === "SoundCloud" && musicConnections.soundcloud) score += 10;
@@ -151,21 +158,25 @@ function applyPreset(presetName) {
     sessionInput.value = "Deep Focus Session";
     modeInput.value = "build";
     categoryInput.value = "focus";
+    notesInput.value = "Focused work block.";
     setSelectedMood("focused");
   } else if (presetName === "creative-sprint") {
     sessionInput.value = "Creative Sprint";
     modeInput.value = "prototype";
     categoryInput.value = "creative";
+    notesInput.value = "Idea generation and creative flow.";
     setSelectedMood("creative");
   } else if (presetName === "recovery-reset") {
     sessionInput.value = "Recovery Reset";
     modeInput.value = "test";
     categoryInput.value = "recovery";
+    notesInput.value = "Calm reset session.";
     setSelectedMood("calm");
   } else if (presetName === "energy-lift") {
     sessionInput.value = "Energy Lift";
     modeInput.value = "build";
     categoryInput.value = "energy";
+    notesInput.value = "High-energy motivation session.";
     setSelectedMood("hype");
   }
 
@@ -208,6 +219,46 @@ function updateMusicUI() {
 
   connectedServicesCount.textContent = `${getConnectedCount()} / 3`;
   primarySource.textContent = getPrimarySource();
+}
+
+function updateDriveModeUI() {
+  document.body.classList.toggle("drive-mode", driveMode);
+  driveModeButton.textContent = `Drive Mode: ${driveMode ? "On" : "Off"}`;
+}
+
+function formatTime(totalSeconds) {
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+}
+
+function updateTimerDisplay() {
+  timerDisplay.textContent = formatTime(timerSeconds);
+}
+
+function startTimer() {
+  if (timerInterval) return;
+
+  timerInterval = setInterval(function () {
+    timerSeconds += 1;
+    updateTimerDisplay();
+  }, 1000);
+
+  setFeedback("Timer started.");
+}
+
+function pauseTimer() {
+  clearInterval(timerInterval);
+  timerInterval = null;
+  setFeedback("Timer paused.");
+}
+
+function resetTimer() {
+  clearInterval(timerInterval);
+  timerInterval = null;
+  timerSeconds = 0;
+  updateTimerDisplay();
+  setFeedback("Timer reset.");
 }
 
 function getTopValue(key) {
@@ -287,7 +338,8 @@ function renderHistory() {
         session.mode.toLowerCase().includes(searchValue) ||
         session.mood.toLowerCase().includes(searchValue) ||
         session.category.toLowerCase().includes(searchValue) ||
-        session.rauxType.toLowerCase().includes(searchValue)
+        session.rauxType.toLowerCase().includes(searchValue) ||
+        (session.notes && session.notes.toLowerCase().includes(searchValue))
       );
     });
   }
@@ -334,7 +386,9 @@ function renderHistory() {
           <span class="info-badge">${session.rauxType}</span>
           <span class="info-badge">SCORE ${session.score}</span>
           <span class="info-badge">${session.recommendedSource}</span>
+          <span class="info-badge">${session.duration}</span>
         </div>
+        ${session.notes ? `Notes: ${session.notes}<br>` : ""}
         Spotify: ${session.spotifyConnected ? "Yes" : "No"}<br>
         Apple Music: ${session.appleMusicConnected ? "Yes" : "No"}<br>
         SoundCloud: ${session.soundcloudConnected ? "Yes" : "No"}<br>
@@ -490,10 +544,22 @@ soundcloudButton.addEventListener("click", function () {
   setFeedback("SoundCloud prototype state updated.");
 });
 
+driveModeButton.addEventListener("click", function () {
+  driveMode = !driveMode;
+  saveDriveMode();
+  updateDriveModeUI();
+  setFeedback(`Drive Mode ${driveMode ? "enabled" : "disabled"}.`);
+});
+
+timerStartButton.addEventListener("click", startTimer);
+timerPauseButton.addEventListener("click", pauseTimer);
+timerResetButton.addEventListener("click", resetTimer);
+
 startButton.addEventListener("click", function () {
   const sessionName = sessionInput.value.trim();
   const mode = modeInput.value;
   const category = categoryInput.value;
+  const notes = notesInput.value.trim();
 
   if (sessionName === "" || mode === "" || category === "" || selectedMood === "") {
     output.textContent = "Please complete session name, mode, category, and mood before starting.";
@@ -509,6 +575,7 @@ startButton.addEventListener("click", function () {
   const score = getSessionScore(mode, category, selectedMood, recommended);
   const boxClass = getBoxClass(rauxType);
   const timestamp = getTimestamp();
+  const duration = formatTime(timerSeconds);
 
   recommendedSource.textContent = recommended;
   sessionScore.textContent = score;
@@ -521,6 +588,8 @@ startButton.addEventListener("click", function () {
     Suggested Raux Type: ${rauxType}<br>
     Recommended Source: ${recommended}<br>
     Session Score: ${score}<br>
+    Duration: ${duration}<br>
+    ${notes ? `Notes: ${notes}<br>` : ""}
     Spotify: ${musicConnections.spotify ? "Connected (prototype)" : "Not connected"}<br>
     Apple Music: ${musicConnections.appleMusic ? "Connected (prototype)" : "Not connected"}<br>
     SoundCloud: ${musicConnections.soundcloud ? "Connected (prototype)" : "Not connected"}<br>
@@ -537,9 +606,11 @@ startButton.addEventListener("click", function () {
     mode,
     category,
     mood: selectedMood,
+    notes,
     rauxType,
     recommendedSource: recommended,
     score,
+    duration,
     spotifyConnected: musicConnections.spotify,
     appleMusicConnected: musicConnections.appleMusic,
     soundcloudConnected: musicConnections.soundcloud,
@@ -559,6 +630,7 @@ resetButton.addEventListener("click", function () {
   sessionInput.value = "";
   modeInput.value = "";
   categoryInput.value = "";
+  notesInput.value = "";
   selectedMood = "";
 
   moodButtons.forEach(button => button.classList.remove("active"));
@@ -619,6 +691,8 @@ filterCategory.addEventListener("change", renderHistory);
 searchInput.addEventListener("input", renderHistory);
 
 updateMusicUI();
+updateDriveModeUI();
+updateTimerDisplay();
 renderHistory();
 updateStats();
 updateRoutePanelFromLatest();
