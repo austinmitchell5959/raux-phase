@@ -889,4 +889,18 @@ body.drive-mode .timer-display {
     display: flex;
     flex-direction: column;
   }
+}.drive-mode {
+  background: #0b0b0b;
+  color: #fff;
+}
+
+.drive-mode .main-control {
+  font-size: 1.4em;
+}
+
+:root {
+  --transition-speed: 0.3s;
+}
+* {
+  transition: all var(--transition-speed) ease;
 }

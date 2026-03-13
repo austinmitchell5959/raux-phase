@@ -17,15 +17,12 @@ const resetButton = document.getElementById("resetButton");
 const clearHistoryButton = document.getElementById("clearHistoryButton");
 const exportButton = document.getElementById("exportButton");
 const favoritesOnlyButton = document.getElementById("favoritesOnlyButton");
-const driveModeButton = document.getElementById("driveModeButton");
 const filterMood = document.getElementById("filterMood");
 const filterMode = document.getElementById("filterMode");
 const filterCategory = document.getElementById("filterCategory");
 const searchInput = document.getElementById("searchInput");
 const output = document.getElementById("output");
-const outputBox = document.getElementById("outputBox");
 const historyList = document.getElementById("historyList");
-const feedbackMessage = document.getElementById("feedbackMessage");
 const undoBanner = document.getElementById("undoBanner");
 const undoDeleteButton = document.getElementById("undoDeleteButton");
 
@@ -967,3 +964,79 @@ loadPreferencesIntoInputs();
 renderHistory();
 updateStats();
 updateRoutePanelFromLatest();
+// ==== DRIVE MODE TOGGLE SYSTEM ====
+
+// State
+let driveModeActive = false;
+
+// Elements (update these IDs if needed)
+const driveModeButton = document.getElementById("driveModeButton");
+const body = document.body;
+const outputBox = document.getElementById("output");
+const feedbackMessage = document.getElementById("feedbackMessage");
+
+// Activation logic
+function toggleDriveMode() {
+  driveModeActive = !driveModeActive;
+  body.classList.toggle("drive-mode", driveModeActive);
+
+  if (driveModeActive) {
+    activateDriveMode();
+  } else {
+    deactivateDriveMode();
+  }
+}
+
+// Drive Mode ON
+function activateDriveMode() {
+  logToUser("🚗 Drive Mode activated — minimal interface enabled.");
+
+  // Example visual simplification
+  document.querySelectorAll(".complex-ui").forEach(function (el) {
+    el.style.display = "none";
+  });
+
+  // Enlarge key buttons for easier touch
+  document.querySelectorAll(".main-control").forEach(function (btn) {
+    btn.style.transform = "scale(1.2)";
+  });
+
+  // Optional — automatically set a safe mode
+  simplifyAnimations();
+}
+
+// Drive Mode OFF
+function deactivateDriveMode() {
+  logToUser("🟢 Drive Mode disabled — full controls restored.");
+
+  document.querySelectorAll(".complex-ui").forEach(function (el) {
+    el.style.display = "block";
+  });
+  document.querySelectorAll(".main-control").forEach(function (btn) {
+    btn.style.transform = "scale(1)";
+  });
+  restoreAnimations();
+}
+
+// Helper — reduce or clear motion
+function simplifyAnimations() {
+  document.documentElement.style.setProperty("--transition-speed", "0s");
+}
+function restoreAnimations() {
+  document.documentElement.style.setProperty("--transition-speed", "0.3s");
+}
+
+// Helper — show user message
+function logToUser(msg) {
+  if (feedbackMessage) {
+    feedbackMessage.textContent = msg;
+  } else {
+    console.log(msg);
+  }
+}
+
+// Event Listener
+if (driveModeButton) {
+  driveModeButton.addEventListener("click", toggleDriveMode);
+}
+

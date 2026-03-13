@@ -1,7 +1,46 @@
-// app.js — Browser version for Raux
+  input: process.stdin,
+  output: process.stdout
+});
+
+const appName = "Raux Phase 2";
+
+function getRauxType(mood) {
+  const lowerMood = mood.toLowerCase();
+
+  if (lowerMood === "focused") {
+    return "Deep Work";
+  } else if (lowerMood === "creative") {
+    return "Idea Sprint";
+  } else if (lowerMood === "calm") {
+    return "Soft Session";
+  } else if (lowerMood === "hype") {
+    return "Energy Boost";
+  } else {
+    return "Custom Session";
+  }
+}
+
+console.log(`${appName} is running`);
+
+rl.question("What do you want to call this session? ", function(sessionName) {
+  rl.question("What mode are we in? ", function(mode) {
+    rl.question("What is the mood? ", function(mood) {
+      const rauxType = getRauxType(mood);
+
+      console.log("\n--- Session Summary ---");
+      console.log(`App: ${appName}`);
+      console.log(`Session: ${sessionName}`);
+      console.log(`Mode: ${mode}`);
+      console.log(`Mood: ${mood}`);
+      console.log(`Suggested Raux Type: ${rauxType}`);
+
+      rl.close();
+    });
+  });
+});
+// app.js — Basic mock player for Raux
 console.log("✅ app.js loaded");
 
-// === SIMPLE PLAYER LOGIC === //
 function getRandomTrack() {
   const allTracks = [
     ...window.mockPlaylists.spotify,
@@ -23,6 +62,7 @@ function nextTrack() {
   logBehavior("play", next);
 }
 
+// Behavior logging
 function logBehavior(eventType, track) {
   const entry = { event: eventType, track, time: new Date().toLocaleTimeString() };
   const logs = JSON.parse(localStorage.getItem("rauxLogs") || "[]");
@@ -30,14 +70,21 @@ function logBehavior(eventType, track) {
   localStorage.setItem("rauxLogs", JSON.stringify(logs));
 }
 
-window.addEventListener("keydown", e => { if (e.key === "n") nextTrack(); });
-window.addEventListener("load", () => playTrack(getRandomTrack()));
+// Test button (optional)
+document.addEventListener("keydown", (e) => {
+  if (e.key === "n") nextTrack(); // press “n” to skip
+});
 
-// === DRIVE SYNC SIMULATOR === //
+// preload first track
+window.addEventListener("load", () => {
+  playTrack(getRandomTrack());
+});
+// ==== DRIVE SYNC SIMULATOR ==== //
 console.log("✅ DriveSync active");
 
 function simulateDrive(speed, weather, distance) {
   let context = "standard";
+
   if (speed > 70) context = "highway";
   else if (speed < 30) context = "city";
   if (weather === "rainy") context = "rainy";
@@ -58,6 +105,8 @@ function pickTrackByMood(context) {
     ...mockPlaylists.apple,
     ...mockPlaylists.soundcloud
   ];
+
+  // Simple mapping between drive context and track moods
   const moodMap = {
     highway: "energy",
     city: "focus",
@@ -65,8 +114,9 @@ function pickTrackByMood(context) {
     longtrip: "chill",
     standard: "night"
   };
+
   const mood = moodMap[context] || "night";
   const filtered = allTracks.filter(t => t.mood === mood);
-  if (filtered.length) return filtered[Math.floor(Math.random() * filtered.length)];
-  return getRandomTrack();
+  if (filtered.length > 0) return filtered[Math.floor(Math.random() * filtered.length)];
+  return getRandomTrack(); // fallback
 }
