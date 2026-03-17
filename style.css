@@ -904,3 +904,41 @@ body.drive-mode .timer-display {
 * {
   transition: all var(--transition-speed) ease;
 }
+body {
+  transition: background 1s ease;
+  color: white;
+}
+button {
+  background: #121212;
+  color: #fff;
+  border: 1px solid #3a3a3a;
+  border-radius: 8px;
+  padding: 10px 18px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+button:hover {
+  background: #1f1f1f;
+}
+
+button:active {
+  background: #343434;
+}
+
+.context-info {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  font-size: 16px;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 8px 14px;
+  border-radius: 6px;
+}
+
+body.highway { background: linear-gradient(90deg,#240000,#550000); }
+body.city { background: linear-gradient(90deg,#1a1a1a,#333333); }
+body.rainy { background: linear-gradient(90deg,#001933,#003366); }
+body.longtrip { background: linear-gradient(90deg,#0b2b00,#114400); }
+body.standard { background: linear-gradient(90deg,#000013,#090933); }

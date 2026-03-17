@@ -395,9 +395,24 @@
     </div>
   </div>
   <link rel="stylesheet" href="style.css">
-  <script src="mockAPI.js"></script>
-  <script src="app.js"></script>
-  </body>
-  </html>
+<script src="mockAPI.js"></script>
+<script src="app.js"></script>
 
-  
+<!-- Control buttons -->
+<button onclick="startVoiceControl()" id="voiceButton" style="margin:10px; padding:10px;">
+  🎙️ Start Voice Control
+</button>
+<button onclick="playRoute()" style="margin:10px; padding:10px;">
+  🛣️ Simulate Full Drive
+  <button onclick="playRauxRadio()" style="margin:10px; padding:10px;">
+    📻 Raux Radio Live
+    <div id="contextInfo" class="context-info">Context: – | Weather: –</div>
+    <button onclick="showLearningStats()" style="margin:10px; padding:10px;">
+      📊 Show Learning Summary
+      <button onclick="runDemo()" style="margin:10px; padding:10px;">
+        🎬 Run Raux Demo Mode  
+    </button>
+  </button>  
+</button>
+</body>
+</html>

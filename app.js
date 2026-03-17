@@ -1,72 +1,65 @@
-// app.js — Browser version for Raux
-console.log("✅ app.js loaded");
-
-// === SIMPLE PLAYER LOGIC === //
-function getRandomTrack() {
-  const allTracks = [
-    ...window.mockPlaylists.spotify,
-    ...window.mockPlaylists.apple,
-    ...window.mockPlaylists.soundcloud
-  ];
-  return allTracks[Math.floor(Math.random() * allTracks.length)];
-}
-
-function playTrack(track) {
-  console.log(`🎵 Now playing: ${track.title} — ${track.artist} [${track.mood}]`);
-  const display = document.getElementById("output") || document.body;
-  display.innerHTML = `<p>🎵 ${track.title} — ${track.artist}</p>`;
-}
-
-function nextTrack() {
-  const next = getRandomTrack();
-  playTrack(next);
-  logBehavior("play", next);
-}
-
-function logBehavior(eventType, track) {
-  const entry = { event: eventType, track, time: new Date().toLocaleTimeString() };
-  const logs = JSON.parse(localStorage.getItem("rauxLogs") || "[]");
-  logs.push(entry);
-  localStorage.setItem("rauxLogs", JSON.stringify(logs));
-}
-
-window.addEventListener("keydown", e => { if (e.key === "n") nextTrack(); });
-window.addEventListener("load", () => playTrack(getRandomTrack()));
-
-// === DRIVE SYNC SIMULATOR === //
-console.log("✅ DriveSync active");
-
-function simulateDrive(speed, weather, distance) {
-  let context = "standard";
-  if (speed > 70) context = "highway";
-  else if (speed < 30) context = "city";
-  if (weather === "rainy") context = "rainy";
-  if (distance > 200) context = "longtrip";
-
-  console.log(`🛣️ Drive context: ${context}`);
-  updateMusicForContext(context);
-}
-
 function updateMusicForContext(context) {
+  document.body.className = context;
+  const info = document.getElementById("contextInfo");
+  if (info) info.textContent = `Context: ${context}`;
   const track = pickTrackByMood(context);
   playTrack(track);
-}
+}// ==== RAUX LEARNING DASHBOARD ==== //
+function showLearningStats() {
+    const logs = JSON.parse(localStorage.getItem("rauxLogs") || "[]");
+    const moodCounts = {};
+    logs.forEach(l => {
+      const mood = l.track.mood;
+      moodCounts[mood] = (moodCounts[mood] || 0) + 1;
+    });
+    const summary =
+      Object.entries(moodCounts)
+        .map(([m, c]) => `${m}: ${c}`)
+        .join(" | ") || "no data yet";
+    console.log("📊 Raux learning summary:", summary);
+    alert("Raux Learning Summary:\n" + summary);
+  }
+  // ==== VOICE RESPONSE ==== //
+function speak(text) {
+    if (!("speechSynthesis" in window)) {
+      console.log("🗣️ Speech synthesis not supported here.");
+      return;
+    }
+    const msg = new SpeechSynthesisUtterance(text);
+    msg.rate = 1.05;
+    msg.pitch = 1;
+    speechSynthesis.speak(msg);
+  }
+  // ==== AUTO-DEMO MODE ==== //
+function runDemo() {
+    console.log("🎬 Starting Raux demo mode...");
+    speak("Welcome to Raux. Starting the demo drive.");
+  
+    setTimeout(() => simulateDrive(25,"clear",10), 2000); // city
+    setTimeout(() => speak("Now entering the highway."), 7000);
+    setTimeout(() => simulateDrive(80,"clear",100), 9000); // highway
+    setTimeout(() => speak("Sudden rain ahead."), 14000);
+    setTimeout(() => simulateDrive(50,"rainy",60), 16000); // rainy
+    setTimeout(() => playRauxRadio(), 21000); // radio intro clip
+    setTimeout(() => speak("Returning to personalized music."), 26000);
+    setTimeout(() => showLearningStats(), 28000);
+    setTimeout(() => speak("Demo complete."), 30000);
+  }
+  let radioAudio = new Audio("raux_radio_intro.mp3");
+radioAudio.preload = "auto";
 
-function pickTrackByMood(context) {
-  const allTracks = [
-    ...mockPlaylists.spotify,
-    ...mockPlaylists.apple,
-    ...mockPlaylists.soundcloud
-  ];
-  const moodMap = {
-    highway: "energy",
-    city: "focus",
-    rainy: "rainy",
-    longtrip: "chill",
-    standard: "night"
-  };
-  const mood = moodMap[context] || "night";
-  const filtered = allTracks.filter(t => t.mood === mood);
-  if (filtered.length) return filtered[Math.floor(Math.random() * filtered.length)];
-  return getRandomTrack();
+function playRauxRadio() {
+  // user-initiated event = safe
+  radioAudio.volume = 0.8;
+  radioAudio.currentTime = 0;
+  radioAudio.play()
+    .then(() => {
+      console.log("📻 Raux Radio playing");
+      setTimeout(() => startFadeOut(radioAudio, 4000), 16000);
+      setTimeout(() => {
+        console.log("🎵 Returning to personalized music");
+        nextTrack();
+      }, 20000);
+    })
+    .catch(err => console.error("Audio play blocked:", err));
 }
